@@ -448,17 +448,18 @@ function updateSynthStatus(){
 }
 
 // ── API ──
+const GEMINI_KEY='AQ.Ab8RN6IFdCnsNivZk8P13IjF9ymHtHLpz_UYkyUNUZzNnRn3fA';
 async function callClaude(prompt,resultEl){
   resultEl.style.display='block';resultEl.className='result-box visible loading';
   resultEl.textContent='✦ Odczytuję energie… proszę czekać…';
   try{
-    const resp=await fetch("https://api.anthropic.com/v1/messages",{
+    const resp=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_KEY}`,{
       method:"POST",headers:{"Content-Type":"application/json"},
-      body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:1000,messages:[{role:"user",content:prompt}]})
+      body:JSON.stringify({contents:[{parts:[{text:prompt}]}],generationConfig:{maxOutputTokens:1500,temperature:0.85}})
     });
     const data=await resp.json();
     resultEl.className='result-box visible';
-    const text=data.content?.[0]?.text||'Przepraszam, wystąpił błąd. Spróbuj ponownie.';
+    const text=data.candidates?.[0]?.content?.parts?.[0]?.text||'Przepraszam, wystąpił błąd. Spróbuj ponownie.';
     resultEl.textContent=text;return text;
   } catch(e){
     resultEl.className='result-box visible';
