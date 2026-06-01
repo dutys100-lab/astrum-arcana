@@ -1,0 +1,783 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Astrum & Arcana</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600&family=EB+Garamond:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --cream:#faf6ef;--parchment:#f2ead8;--gold:#b8902a;--gold-l:#d4aa4a;
+  --gold-pale:#e8d5a0;--gold-border:rgba(184,144,42,0.22);
+  --ink:#2a2018;--ink-mid:#5a4a32;--ink-soft:#8a7a62;
+  --mystic:#6b4fa0;--mystic-l:#9b7fc8;--mystic-pale:#f0ebfa;
+  --teal:#1a7a6e;--teal-pale:#e8f5f3;--teal-border:rgba(26,122,110,0.2);
+  --rose:#9b4060;--surface:#fff;--surface2:#fdf9f2;
+  --sidebar:230px;
+}
+body{font-family:'EB Garamond',serif;background:var(--cream);color:var(--ink);min-height:100vh;font-size:17px;line-height:1.7;}
+.app-shell{display:flex;min-height:100vh;}
+
+/* SIDEBAR */
+.sidebar{width:var(--sidebar);min-width:var(--sidebar);background:var(--surface);border-right:1px solid var(--gold-border);display:flex;flex-direction:column;padding:2rem 0 2rem;position:sticky;top:0;height:100vh;overflow-y:auto;}
+.sidebar-logo{text-align:center;padding:0 1rem 1.6rem;border-bottom:1px solid var(--gold-border);}
+.sidebar-logo .sym{font-size:1.2rem;color:var(--gold-l);letter-spacing:0.3em;display:block;}
+.sidebar-logo h1{font-family:'Cinzel',serif;font-size:0.95rem;font-weight:400;letter-spacing:0.1em;color:var(--ink);margin-top:0.4rem;}
+.sidebar-logo p{font-size:0.62rem;letter-spacing:0.15em;text-transform:uppercase;color:var(--ink-soft);margin-top:2px;}
+.nav{flex:1;padding:1.2rem 0.8rem 1rem;display:flex;flex-direction:column;gap:5px;}
+.nav-item{display:flex;align-items:center;gap:9px;padding:0.6rem 0.85rem;border-radius:6px;cursor:pointer;transition:all 0.18s;border:1px solid transparent;font-family:'Cinzel',serif;font-size:0.76rem;letter-spacing:0.07em;color:var(--ink-mid);background:none;text-align:left;width:100%;}
+.nav-item .nav-icon{font-size:1rem;width:18px;text-align:center;flex-shrink:0;}
+.nav-item:hover{background:var(--parchment);color:var(--ink);}
+.nav-item.active{background:var(--parchment);border-color:var(--gold-border);color:var(--gold);}
+.nav-divider{height:1px;background:var(--gold-border);margin:0.5rem 0.5rem;}
+.nav-item.synth-nav{border-color:var(--gold-border);color:var(--gold);}
+.nav-item.synth-nav.locked{opacity:0.42;cursor:not-allowed;}
+.nav-item.synth-nav.unlocked{background:var(--gold);color:#fff;border-color:var(--gold);}
+.nav-item.synth-nav.unlocked:hover{background:var(--gold-l);}
+.nav-hint{font-size:0.66rem;color:var(--ink-soft);padding:0 1rem;font-style:italic;line-height:1.5;margin-top:3px;}
+.sidebar-footer{padding:0 1rem;border-top:1px solid var(--gold-border);padding-top:0.9rem;margin-top:1rem;}
+.sidebar-footer p{font-size:0.6rem;color:var(--ink-soft);text-align:center;letter-spacing:0.07em;font-family:'Cinzel',serif;}
+
+/* MAIN */
+.main-area{flex:1;padding:2.5rem 2.5rem 4rem;max-width:720px;}
+.section{display:none;}.section.active{display:block;}
+.sec-header{margin-bottom:1.6rem;padding-bottom:0.85rem;border-bottom:1px solid var(--gold-border);}
+.sec-header h2{font-family:'Cinzel',serif;font-size:1.35rem;font-weight:400;letter-spacing:0.1em;color:var(--ink);display:flex;align-items:center;gap:0.6rem;}
+.sec-header p{font-size:0.76rem;letter-spacing:0.12em;text-transform:uppercase;color:var(--ink-soft);margin-top:4px;font-family:'Cinzel',serif;}
+
+/* INNER TABS (numerologia) */
+.inner-tabs{display:flex;gap:4px;margin-bottom:1.4rem;border-bottom:1px solid var(--gold-border);padding-bottom:0;}
+.inner-tab{font-family:'Cinzel',serif;font-size:0.74rem;letter-spacing:0.08em;color:var(--ink-soft);background:none;border:none;border-bottom:2px solid transparent;padding:0.5rem 1rem 0.55rem;cursor:pointer;transition:all 0.18s;margin-bottom:-1px;}
+.inner-tab:hover{color:var(--ink);}
+.inner-tab.active{color:var(--gold);border-bottom-color:var(--gold);}
+.inner-panel{display:none;}.inner-panel.active{display:block;}
+
+/* FORMS */
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:0.9rem;margin-bottom:1rem;}
+.fg{display:flex;flex-direction:column;gap:0.3rem;}.fg.full{grid-column:1/-1;}
+label{font-size:0.68rem;letter-spacing:0.18em;text-transform:uppercase;color:var(--ink-soft);font-family:'Cinzel',serif;}
+input,select,textarea{background:var(--surface);border:1px solid var(--gold-border);border-radius:4px;color:var(--ink);font-family:'EB Garamond',serif;font-size:1rem;padding:0.5rem 0.72rem;transition:border-color 0.2s,box-shadow 0.2s;outline:none;width:100%;}
+input:focus,select:focus,textarea:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(184,144,42,0.1);}
+select option{background:#fff;color:var(--ink);}
+textarea{resize:vertical;min-height:52px;}
+.hint{font-size:0.72rem;color:var(--ink-soft);font-style:italic;}
+
+/* BUTTONS */
+.btn-main{font-family:'Cinzel',serif;font-size:0.8rem;letter-spacing:0.12em;color:#fff;background:var(--gold);border:none;border-radius:4px;padding:0.72rem 2rem;cursor:pointer;transition:background 0.2s,transform 0.1s;width:100%;margin-top:0.4rem;}
+.btn-main:hover{background:var(--gold-l);}
+.btn-main:active{transform:scale(0.99);}
+.btn-main:disabled{opacity:0.45;cursor:not-allowed;}
+.btn-row{display:flex;gap:8px;margin-top:0.9rem;flex-wrap:wrap;}
+.btn-pdf{font-family:'Cinzel',serif;font-size:0.75rem;letter-spacing:0.1em;color:var(--gold);background:transparent;border:1px solid var(--gold-border);border-radius:4px;padding:0.55rem 1.1rem;cursor:pointer;transition:all 0.2s;}
+.btn-pdf:hover{background:var(--parchment);border-color:var(--gold);}
+.btn-pdf-full{font-family:'Cinzel',serif;font-size:0.8rem;letter-spacing:0.12em;color:#fff;background:var(--mystic);border:none;border-radius:4px;padding:0.72rem 1.4rem;cursor:pointer;transition:background 0.2s;display:flex;align-items:center;gap:7px;width:100%;justify-content:center;margin-top:0.5rem;}
+.btn-pdf-full:hover{background:var(--mystic-l);}
+.btn-pdf-full:disabled{opacity:0.45;cursor:not-allowed;}
+.btn-clear{font-family:'Cinzel',serif;font-size:0.72rem;letter-spacing:0.1em;color:var(--ink-soft);background:transparent;border:1px solid var(--gold-border);border-radius:4px;padding:0.45rem 0.9rem;cursor:pointer;transition:all 0.2s;display:inline-flex;align-items:center;gap:5px;}
+.btn-clear:hover{color:var(--rose);border-color:rgba(155,64,96,0.3);background:#fff5f7;}
+
+/* RESULTS */
+.result-box{background:var(--surface2);border:1px solid var(--gold-border);border-left:3px solid var(--gold);border-radius:4px;padding:1.2rem 1.4rem;margin-top:0.9rem;font-size:1rem;line-height:1.85;white-space:pre-wrap;color:var(--ink);display:none;}
+.result-box.visible{display:block;}
+.result-box.loading{color:var(--ink-soft);font-style:italic;}
+
+/* TAROT */
+.layout-desc{background:var(--mystic-pale);border:1px solid rgba(107,79,160,0.15);border-radius:6px;padding:0.65rem 0.85rem;font-size:0.87rem;color:var(--mystic);line-height:1.6;margin-bottom:1rem;}
+.layout-desc strong{font-family:'Cinzel',serif;font-size:0.7rem;letter-spacing:0.1em;display:block;margin-bottom:2px;}
+.sel-panel{background:var(--surface);border:1px solid var(--gold-border);border-radius:6px;padding:0.75rem 0.85rem;margin-bottom:0.85rem;min-height:50px;}
+.sel-label{font-size:0.66rem;letter-spacing:0.18em;text-transform:uppercase;color:var(--ink-soft);font-family:'Cinzel',serif;margin-bottom:0.4rem;}
+.sel-list{display:flex;flex-wrap:wrap;gap:4px;}
+.sel-tag{font-size:0.74rem;padding:2px 7px;border-radius:3px;background:var(--mystic-pale);border:1px solid rgba(107,79,160,0.2);color:var(--mystic);display:inline-flex;align-items:center;gap:3px;font-family:'EB Garamond',serif;}
+.sel-tag.rev{background:#fff0f4;border-color:rgba(155,64,96,0.2);color:var(--rose);}
+.sel-tag button{background:none;border:none;cursor:pointer;color:inherit;opacity:0.6;font-size:0.82rem;line-height:1;padding:0;}
+.rev-row{display:flex;align-items:center;gap:0.5rem;margin-bottom:0.85rem;font-size:0.82rem;color:var(--ink-soft);}
+.rev-row input{width:auto;margin:0;cursor:pointer;}
+.counter{font-size:0.78rem;color:var(--ink-soft);margin-bottom:0.65rem;}
+.counter em{color:var(--gold);font-style:normal;font-weight:500;}
+.arcana-label{font-family:'Cinzel',serif;font-size:0.66rem;letter-spacing:0.2em;text-transform:uppercase;color:var(--ink-soft);margin:0.85rem 0 0.38rem;}
+.cards-grid{display:flex;flex-wrap:wrap;gap:4px;}
+.chip{font-size:0.68rem;padding:3px 6px;border:1px solid var(--gold-border);border-radius:3px;cursor:pointer;background:var(--surface);color:var(--ink-mid);transition:all 0.14s;user-select:none;font-family:'EB Garamond',serif;}
+.chip:hover{border-color:var(--gold);color:var(--ink);background:var(--parchment);}
+.chip.selected{background:var(--mystic-pale);border-color:rgba(107,79,160,0.35);color:var(--mystic);}
+.chip.reversed{background:#fff0f4;border-color:rgba(155,64,96,0.3);color:var(--rose);}
+
+/* NUMEROLOGIA info box */
+.num-info{background:var(--teal-pale);border:1px solid var(--teal-border);border-radius:6px;padding:0.65rem 0.85rem;font-size:0.87rem;color:var(--teal);line-height:1.6;margin-bottom:1rem;}
+.num-info strong{font-family:'Cinzel',serif;font-size:0.7rem;letter-spacing:0.1em;display:block;margin-bottom:2px;color:var(--teal);}
+
+/* SYNTEZA */
+.synth-intro{background:var(--parchment);border:1px solid var(--gold-border);border-radius:8px;padding:1.3rem 1.5rem;margin-bottom:1.4rem;font-size:0.93rem;color:var(--ink-mid);line-height:1.75;}
+.synth-intro h3{font-family:'Cinzel',serif;font-size:0.95rem;font-weight:400;letter-spacing:0.1em;color:var(--gold);margin-bottom:0.55rem;}
+.synth-status{display:flex;flex-direction:column;gap:5px;margin-top:0.75rem;}
+.status-row{display:flex;align-items:center;gap:7px;font-size:0.81rem;}
+.dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;}
+.dot.done{background:var(--gold);}.dot.pending{background:var(--gold-pale);}
+
+@media(max-width:660px){
+  .app-shell{flex-direction:column;}
+  .sidebar{width:100%;height:auto;position:static;padding:0.8rem;border-right:none;border-bottom:1px solid var(--gold-border);}
+  .sidebar-logo{display:none;}
+  .nav{flex-direction:row;flex-wrap:wrap;padding:0;gap:4px;flex:unset;}
+  .nav-divider,.nav-hint,.sidebar-footer{display:none;}
+  .nav-item.synth-nav{margin-top:0;}
+  .main-area{padding:1.2rem 0.9rem 3rem;max-width:100%;}
+  .form-grid{grid-template-columns:1fr;}.fg.full{grid-column:1;}
+  .btn-row{flex-direction:column;}
+}
+</style>
+</head>
+<body>
+<div class="app-shell">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <span class="sym">☽ ✦ ☿</span>
+      <h1>Astrum & Arcana</h1>
+      <p>Poznaj siebie</p>
+    </div>
+    <nav class="nav">
+      <button class="nav-item active" onclick="showSection('astro',this)"><span class="nav-icon">☽</span>Astrologia</button>
+      <button class="nav-item" onclick="showSection('tarot',this)"><span class="nav-icon">✦</span>Tarot</button>
+      <button class="nav-item" onclick="showSection('num',this)"><span class="nav-icon">◉</span>Numerologia</button>
+      <div class="nav-divider"></div>
+      <button class="nav-item synth-nav locked" id="synth-nav" onclick="showSection('synth',this)"><span class="nav-icon">◈</span>Synteza</button>
+      <p class="nav-hint" id="synth-hint">Uzupełnij analizy, aby odblokować Syntezę.</p>
+    </nav>
+    <div class="sidebar-footer"><p>Astrologia · Tarot · Numerologia · Synteza</p></div>
+  </aside>
+
+  <main class="main-area">
+
+    <!-- ══════════ ASTROLOGIA ══════════ -->
+    <div class="section active" id="sec-astro">
+      <div class="sec-header" style="display:flex;align-items:flex-start;justify-content:space-between;gap:1rem;">
+        <div><h2><span>☽</span> Astrologia</h2><p>Wprowadź dane urodzeniowe — AI stworzy Twoją analizę</p></div>
+        <button class="btn-clear" onclick="clearSection('astro')" title="Wyczyść wszystkie dane">↺ Wyczyść</button>
+      </div>
+      <div class="form-grid">
+        <div class="fg"><label>Imię (opcjonalnie)</label><input type="text" id="name" placeholder="Twoje imię…"></div>
+        <div class="fg"><label>Płeć</label>
+          <select id="gender"><option value="kobieta">Kobieta</option><option value="mężczyzna">Mężczyzna</option><option value="niebinarna">Niebinarna / inne</option></select>
+        </div>
+        <div class="fg"><label>Data urodzenia</label><input type="date" id="birthdate"></div>
+        <div class="fg"><label>Godzina urodzenia</label><input type="time" id="birthtime"><span class="hint">Pozwala obliczyć Ascendent</span></div>
+        <div class="fg full"><label>Miejsce urodzenia</label><input type="text" id="birthplace" placeholder="np. Kraków, Polska"></div>
+        <div class="fg"><label>Obszar zainteresowania</label>
+          <select id="focus"><option>Pełna analiza</option><option>Miłość i relacje</option><option>Kariera i finanse</option><option>Zdrowie i witalność</option><option>Rozwój osobisty</option><option>Cel i sens życia</option><option>Rodzina i dom</option></select>
+        </div>
+        <div class="fg"><label>Aktualny nastrój</label>
+          <select id="mood"><option value="">Nie podaję</option><option>Spokojny/a i zrównoważony/a</option><option>Szukam kierunku w życiu</option><option>W trakcie ważnych zmian</option><option>Niepewny/a, szukam odpowiedzi</option><option>Energiczny/a, gotowy/a na działanie</option><option>Refleksyjny/a, wyciszony/a</option></select>
+        </div>
+        <div class="fg full"><label>Dodatkowe pytanie lub kontekst</label><textarea id="extra" placeholder="Czy jest coś, o czym chcesz wiedzieć więcej? (opcjonalnie)"></textarea></div>
+      </div>
+      <button class="btn-main" id="astro-btn" onclick="analyzeAstro()">✦ Oblicz analizę astrologiczną</button>
+      <div class="result-box" id="astro-result"></div>
+      <div class="btn-row" id="astro-pdf-row" style="display:none;">
+        <button class="btn-pdf" onclick="downloadPDF('astro')">⬇ Pobierz PDF — Astrologia</button>
+      </div>
+    </div>
+
+    <!-- ══════════ TAROT ══════════ -->
+    <div class="section" id="sec-tarot">
+      <div class="sec-header" style="display:flex;align-items:flex-start;justify-content:space-between;gap:1rem;">
+        <div><h2><span>✦</span> Tarot</h2><p>Wybierz układ, zaznacz karty — AI zinterpretuje przekaz</p></div>
+        <button class="btn-clear" onclick="clearSection('tarot')" title="Wyczyść wszystkie dane">↺ Wyczyść</button>
+      </div>
+      <div class="form-grid">
+        <div class="fg full"><label>Układ kart</label>
+          <select id="spread-select" onchange="updateSpread()">
+            <option value="1">1 karta — Przekaz dnia / Szybka odpowiedź</option>
+            <option value="3-past">3 karty — Przeszłość · Teraźniejszość · Przyszłość</option>
+            <option value="3-mind">3 karty — Umysł · Ciało · Duch</option>
+            <option value="3-sit">3 karty — Sytuacja · Działanie · Wynik</option>
+            <option value="celtic">Celtycki Krzyż (10 kart)</option>
+            <option value="horseshoe">Podkowa (7 kart)</option>
+            <option value="star">Gwiazda (6 kart)</option>
+            <option value="relationship">Relacja (6 kart)</option>
+            <option value="decision">Rozstaj dróg / Decyzja (5 kart)</option>
+            <option value="year">Układ Roczny — 12 miesięcy</option>
+          </select>
+        </div>
+        <div class="fg full"><label>Twoje pytanie lub intencja</label><input type="text" id="tarot-question" placeholder="O czym chcesz się dowiedzieć? (opcjonalnie)"></div>
+      </div>
+      <div class="layout-desc" id="layout-info"><strong>Opis układu</strong>Wybierz układ powyżej.</div>
+      <div class="rev-row"><input type="checkbox" id="rev-mode"><label for="rev-mode" style="text-transform:none;letter-spacing:0;font-size:0.82rem;font-family:'EB Garamond',serif;">Drugie kliknięcie = karta <em>odwrócona</em></label></div>
+      <div class="counter">Wybrano: <em id="sel-count">0</em> / <em id="need-count">1</em></div>
+      <div class="sel-panel"><div class="sel-label">Wybrane karty</div><div class="sel-list" id="selected-list"><span style="font-size:0.83rem;color:var(--ink-soft);font-style:italic;">Kliknij karty poniżej…</span></div></div>
+      <div class="arcana-label">✦ Wielkie Arkana</div><div class="cards-grid" id="major-grid"></div>
+      <div class="arcana-label">⚔ Miecze</div><div class="cards-grid" id="swords-grid"></div>
+      <div class="arcana-label">♦ Puchary</div><div class="cards-grid" id="cups-grid"></div>
+      <div class="arcana-label">✦ Różdżki</div><div class="cards-grid" id="wands-grid"></div>
+      <div class="arcana-label">☽ Pentakle</div><div class="cards-grid" id="pentacles-grid"></div>
+      <button class="btn-main" id="tarot-btn" onclick="interpretTarot()" style="margin-top:1.3rem;">✦ Interpretuj układ</button>
+      <div class="result-box" id="tarot-result"></div>
+      <div class="btn-row" id="tarot-pdf-row" style="display:none;">
+        <button class="btn-pdf" onclick="downloadPDF('tarot')">⬇ Pobierz PDF — Tarot</button>
+      </div>
+    </div>
+
+    <!-- ══════════ NUMEROLOGIA ══════════ -->
+    <div class="section" id="sec-num">
+      <div class="sec-header" style="display:flex;align-items:flex-start;justify-content:space-between;gap:1rem;">
+        <div><h2><span>◉</span> Numerologia</h2><p>Liczby jako język duszy — trzy wymiary analizy</p></div>
+        <button class="btn-clear" onclick="clearSection('num')" title="Wyczyść dane aktywnej zakładki">↺ Wyczyść</button>
+      </div>
+      <div class="inner-tabs">
+        <button class="inner-tab active" onclick="showInnerTab('num-person',this)">Osoba</button>
+        <button class="inner-tab" onclick="showInnerTab('num-relation',this)">Relacja</button>
+        <button class="inner-tab" onclick="showInnerTab('num-business',this)">Firma / Projekt</button>
+      </div>
+
+      <!-- OSOBA -->
+      <div class="inner-panel active" id="num-person">
+        <div class="num-info">
+          <strong>Pełna analiza numerologiczna osoby</strong>
+          Oblicza Liczbę Życia, Przeznaczenia, Duszy, Osobowości, Rok Osobisty, Liczbę Urodzin i aktywne cykle życiowe.
+        </div>
+        <div class="form-grid">
+          <div class="fg full"><label>Imię i nazwisko (pełne, jak w akcie urodzenia)</label><input type="text" id="np-fullname" placeholder="np. Anna Maria Kowalska"></div>
+          <div class="fg"><label>Data urodzenia</label><input type="date" id="np-birthdate"></div>
+          <div class="fg"><label>Obszar zainteresowania</label>
+            <select id="np-focus"><option>Pełna analiza</option><option>Miłość i relacje</option><option>Kariera i powołanie</option><option>Rozwój duchowy</option><option>Finanse i obfitość</option><option>Zdrowie i energia</option></select>
+          </div>
+          <div class="fg full"><label>Pytanie lub kontekst (opcjonalnie)</label><textarea id="np-extra" placeholder="Co chcesz lepiej zrozumieć?"></textarea></div>
+        </div>
+        <button class="btn-main" id="np-btn" onclick="analyzeNum('person')">◉ Oblicz analizę numerologiczną</button>
+        <div class="result-box" id="np-result"></div>
+        <div class="btn-row" id="np-pdf-row" style="display:none;">
+          <button class="btn-pdf" onclick="downloadPDF('num-person')">⬇ Pobierz PDF — Numerologia Osoby</button>
+        </div>
+      </div>
+
+      <!-- RELACJA -->
+      <div class="inner-panel" id="num-relation">
+        <div class="num-info">
+          <strong>Kompatybilność numerologiczna dwóch osób</strong>
+          Analiza zgodności, dynamiki relacji, wspólnych wyzwań i potencjału — dla związku, przyjaźni lub współpracy.
+        </div>
+        <div class="form-grid">
+          <div class="fg full" style="border-bottom:1px solid var(--gold-border);padding-bottom:0.8rem;margin-bottom:0.2rem;">
+            <label style="color:var(--gold);font-size:0.72rem;">Pierwsza osoba</label>
+          </div>
+          <div class="fg full"><label>Imię i nazwisko</label><input type="text" id="nr-name1" placeholder="np. Anna Kowalska"></div>
+          <div class="fg"><label>Data urodzenia</label><input type="date" id="nr-birth1"></div>
+          <div class="fg"></div>
+          <div class="fg full" style="border-bottom:1px solid var(--gold-border);padding-bottom:0.8rem;margin-bottom:0.2rem;margin-top:0.4rem;">
+            <label style="color:var(--mystic);font-size:0.72rem;">Druga osoba</label>
+          </div>
+          <div class="fg full"><label>Imię i nazwisko</label><input type="text" id="nr-name2" placeholder="np. Piotr Nowak"></div>
+          <div class="fg"><label>Data urodzenia</label><input type="date" id="nr-birth2"></div>
+          <div class="fg"><label>Charakter relacji</label>
+            <select id="nr-type"><option>Związek romantyczny</option><option>Małżeństwo</option><option>Przyjaźń</option><option>Współpraca biznesowa</option><option>Relacja rodzinna</option></select>
+          </div>
+          <div class="fg full"><label>Pytanie lub kontekst (opcjonalnie)</label><textarea id="nr-extra" placeholder="Co chcesz lepiej zrozumieć w tej relacji?"></textarea></div>
+        </div>
+        <button class="btn-main" id="nr-btn" onclick="analyzeNum('relation')">◉ Oblicz kompatybilność</button>
+        <div class="result-box" id="nr-result"></div>
+        <div class="btn-row" id="nr-pdf-row" style="display:none;">
+          <button class="btn-pdf" onclick="downloadPDF('num-relation')">⬇ Pobierz PDF — Numerologia Relacji</button>
+        </div>
+      </div>
+
+      <!-- FIRMA -->
+      <div class="inner-panel" id="num-business">
+        <div class="num-info">
+          <strong>Numerologia firmy i projektu</strong>
+          Analiza nazwy, daty założenia, energii biznesu, Liczby Sukcesu, najlepszych okresów na działanie i kluczowych decyzji.
+        </div>
+        <div class="form-grid">
+          <div class="fg full"><label>Nazwa firmy / projektu</label><input type="text" id="nb-name" placeholder="np. Studio Kreatywne Luz"></div>
+          <div class="fg"><label>Data założenia / startu</label><input type="date" id="nb-date"></div>
+          <div class="fg"><label>Branża / rodzaj działalności</label><input type="text" id="nb-industry" placeholder="np. coaching, sklep online, usługi…"></div>
+          <div class="fg full"><label>Imię właściciela / założyciela (opcjonalnie)</label><input type="text" id="nb-owner" placeholder="Imię i nazwisko właściciela"></div>
+          <div class="fg"><label>Obszar analizy</label>
+            <select id="nb-focus"><option>Pełna analiza firmy</option><option>Energia nazwy i branding</option><option>Najlepszy czas na działanie</option><option>Finanse i wzrost</option><option>Partnerstwo biznesowe</option><option>Rebranding / zmiana nazwy</option></select>
+          </div>
+          <div class="fg full"><label>Pytanie lub kontekst (opcjonalnie)</label><textarea id="nb-extra" placeholder="Co chcesz wiedzieć o swojej firmie?"></textarea></div>
+        </div>
+        <button class="btn-main" id="nb-btn" onclick="analyzeNum('business')">◉ Oblicz numerologię firmy</button>
+        <div class="result-box" id="nb-result"></div>
+        <div class="btn-row" id="nb-pdf-row" style="display:none;">
+          <button class="btn-pdf" onclick="downloadPDF('num-business')">⬇ Pobierz PDF — Numerologia Firmy</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════ SYNTEZA ══════════ -->
+    <div class="section" id="sec-synth">
+      <div class="sec-header" style="display:flex;align-items:flex-start;justify-content:space-between;gap:1rem;">
+        <div><h2><span>◈</span> Synteza</h2><p>Wszystkie analizy połączone w jeden przekaz</p></div>
+        <button class="btn-clear" onclick="clearSection('synth')" title="Wyczyść syntezę">↺ Wyczyść</button>
+      </div>
+      <div class="synth-intro">
+        <h3>Czym jest Synteza?</h3>
+        Synteza łączy gotowe analizy z Astrologii, Tarota i Numerologii w jeden głęboki, spójny obraz. AI znajdzie wspólne motywy, powtarzające się wzorce i wzmocnienia między wszystkimi trzema źródłami — i stworzy całościowy przekaz specjalnie dla Ciebie.
+        <div class="synth-status" id="synth-status"></div>
+      </div>
+      <button class="btn-main" id="synth-btn" onclick="runSynthesis()">◈ Stwórz Syntezę</button>
+      <div class="result-box" id="synth-result"></div>
+      <div id="synth-pdf-row" style="display:none;">
+        <div class="btn-row">
+          <button class="btn-pdf" onclick="downloadPDF('synth')">⬇ Pobierz PDF — Synteza</button>
+        </div>
+        <button class="btn-pdf-full" id="full-pdf-btn" onclick="downloadPDF('full')">⬇ Pobierz Pełny Raport PDF</button>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<script>
+// ── TAROT DATA ──
+const MAJOR=["0 Głupiec","I Mag","II Najwyższa Kapłanka","III Cesarzowa","IV Cesarz","V Papież","VI Kochankowie","VII Rydwan","VIII Siła","IX Pustelnik","X Koło Fortuny","XI Sprawiedliwość","XII Wieszak","XIII Śmierć","XIV Umiarkowanie","XV Diabeł","XVI Wieża","XVII Gwiazda","XVIII Księżyc","XIX Słońce","XX Sąd Ostateczny","XXI Świat"];
+const SUITS={
+  swords:["As Mieczy","2 Mieczy","3 Mieczy","4 Mieczy","5 Mieczy","6 Mieczy","7 Mieczy","8 Mieczy","9 Mieczy","10 Mieczy","Paź Mieczy","Rycerz Mieczy","Królowa Mieczy","Król Mieczy"],
+  cups:["As Pucharów","2 Pucharów","3 Pucharów","4 Pucharów","5 Pucharów","6 Pucharów","7 Pucharów","8 Pucharów","9 Pucharów","10 Pucharów","Paź Pucharów","Rycerz Pucharów","Królowa Pucharów","Król Pucharów"],
+  wands:["As Różdżek","2 Różdżek","3 Różdżek","4 Różdżek","5 Różdżek","6 Różdżek","7 Różdżek","8 Różdżek","9 Różdżek","10 Różdżek","Paź Różdżek","Rycerz Różdżek","Królowa Różdżek","Król Różdżek"],
+  pentacles:["As Pentakli","2 Pentakli","3 Pentakli","4 Pentakli","5 Pentakli","6 Pentakli","7 Pentakli","8 Pentakli","9 Pentakli","10 Pentakli","Paź Pentakli","Rycerz Pentakli","Królowa Pentakli","Król Pentakli"]
+};
+const SPREADS={
+  "1":{count:1,positions:["Przekaz / Odpowiedź"],desc:"Jedna karta — bezpośredni przekaz na dziś lub odpowiedź na pytanie."},
+  "3-past":{count:3,positions:["Przeszłość","Teraźniejszość","Przyszłość"],desc:"Klasyczny układ trzech kart pokazujący przepływ energii w czasie."},
+  "3-mind":{count:3,positions:["Umysł","Ciało","Duch"],desc:"Trzy wymiary istnienia — myśl, fizyczność i intuicja."},
+  "3-sit":{count:3,positions:["Sytuacja","Działanie / Rada","Wynik"],desc:"Praktyczny układ: jak jest, co zrobić i dokąd to prowadzi."},
+  "celtic":{count:10,positions:["Serce sprawy","Przeszkoda","Podłoże","Odległa przeszłość","Możliwy wynik","Bliska przyszłość","Twoja postawa","Wpływ zewnętrzny","Nadzieje i lęki","Ostateczny wynik"],desc:"Celtycki Krzyż — 10 pozycji, pełny wgląd w sytuację."},
+  "horseshoe":{count:7,positions:["Przeszłość","Teraźniejszość","Ukryte wpływy","Przeszkody","Otoczenie","Rada","Wynik"],desc:"Podkowa — 7 kart, wszechstronny obraz sytuacji."},
+  "star":{count:6,positions:["Teraźniejszość","Nadzieje i marzenia","Lęki","Fundament","Co blokuje","Kierunek"],desc:"Gwiazda — 6 kart skupionych na świecie wewnętrznym i kierunku."},
+  "relationship":{count:6,positions:["Ty","Druga osoba","Połączenie","Przeszłość relacji","Wyzwanie","Potencjał"],desc:"Układ na relację — dynamika i potencjał między dwiema osobami."},
+  "decision":{count:5,positions:["Serce pytania","Opcja A","Opcja B","Co możesz stracić","Co możesz zyskać"],desc:"Rozstaj dróg — 5 kart pomagających zobaczyć obie ścieżki jasno."},
+  "year":{count:12,positions:["Styczen","Luty","Marzec","Kwiecien","Maj","Czerwiec","Lipiec","Sierpien","Wrzesien","Pazdziernik","Listopad","Grudzien"],desc:"Układ roczny — 12 kart, po jednej na każdy miesiąc."}
+};
+
+// ── STATE ──
+let selectedCards={};
+let currentSpread="1";
+let savedAstro="",savedTarot="",savedNumPerson="",savedNumRelation="",savedNumBusiness="",savedSynth="";
+let savedAstroMeta={},savedTarotMeta={},savedNpMeta={},savedNrMeta={},savedNbMeta={};
+
+// ── NAVIGATION ──
+function showSection(id,btn){
+  if(id==='synth'&&document.getElementById('synth-nav').classList.contains('locked')) return;
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(b=>b.classList.remove('active'));
+  document.getElementById('sec-'+id).classList.add('active');
+  if(btn) btn.classList.add('active');
+  if(id==='synth') updateSynthStatus();
+}
+
+function showInnerTab(id,btn){
+  document.querySelectorAll('.inner-panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.inner-tab').forEach(b=>b.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  if(btn) btn.classList.add('active');
+}
+
+// ── TAROT GRIDS ──
+function buildGrid(gid,cards){
+  const g=document.getElementById(gid);
+  cards.forEach(name=>{
+    const c=document.createElement('div');c.className='chip';c.textContent=name;c.dataset.card=name;
+    c.onclick=()=>toggleCard(name,c);g.appendChild(c);
+  });
+}
+buildGrid('major-grid',MAJOR);buildGrid('swords-grid',SUITS.swords);
+buildGrid('cups-grid',SUITS.cups);buildGrid('wands-grid',SUITS.wands);buildGrid('pentacles-grid',SUITS.pentacles);
+
+function toggleCard(name,chip){
+  const needed=SPREADS[currentSpread].count;
+  const rev=document.getElementById('rev-mode').checked;
+  if(selectedCards[name]===undefined){
+    if(Object.keys(selectedCards).length>=needed) return;
+    selectedCards[name]=false;chip.className='chip selected';
+  } else if(selectedCards[name]===false&&rev){
+    selectedCards[name]=true;chip.className='chip reversed';
+  } else {delete selectedCards[name];chip.className='chip';}
+  renderSelected();
+}
+function removeCard(name){
+  delete selectedCards[name];
+  document.querySelectorAll('.chip').forEach(c=>{if(c.dataset.card===name)c.className='chip';});
+  renderSelected();
+}
+function renderSelected(){
+  const spread=SPREADS[currentSpread];const names=Object.keys(selectedCards);
+  document.getElementById('sel-count').textContent=names.length;
+  const list=document.getElementById('selected-list');
+  if(!names.length){list.innerHTML='<span style="font-size:0.82rem;color:var(--ink-soft);font-style:italic;">Kliknij karty poniżej…</span>';return;}
+  list.innerHTML=names.map((n,i)=>{
+    const pos=spread.positions[i]?`<small style="opacity:0.65;margin-right:3px;">${spread.positions[i]}:</small>`:'';
+    const safe=n.replace(/'/g,"\\'");
+    return `<span class="sel-tag${selectedCards[n]?' rev':''}">${pos}${n}${selectedCards[n]?' (↓)':''}<button onclick="removeCard('${safe}')">×</button></span>`;
+  }).join('');
+}
+function updateSpread(){
+  currentSpread=document.getElementById('spread-select').value;
+  const s=SPREADS[currentSpread];
+  const selEl=document.getElementById('spread-select');
+  const nm=selEl.options[selEl.selectedIndex].text.split(' — ')[0];
+  document.getElementById('layout-info').innerHTML=`<strong>${nm}</strong>${s.positions.join(' · ')}<br><span style="opacity:0.8;font-size:0.85rem;">${s.desc}</span>`;
+  document.getElementById('need-count').textContent=s.count;
+  selectedCards={};document.querySelectorAll('.chip').forEach(c=>c.className='chip');renderSelected();
+}
+updateSpread();
+
+// ── SYNTH UNLOCK ──
+function checkUnlock(){
+  const hasMin=savedAstro||savedTarot||savedNumPerson||savedNumRelation||savedNumBusiness;
+  const nav=document.getElementById('synth-nav');
+  const hint=document.getElementById('synth-hint');
+  if(hasMin){
+    nav.classList.remove('locked');nav.classList.add('unlocked');hint.style.display='none';
+  }
+}
+function updateSynthStatus(){
+  const el=document.getElementById('synth-status');
+  const items=[
+    {label:'Astrologia',done:!!savedAstro},
+    {label:'Tarot',done:!!savedTarot},
+    {label:'Numerologia — Osoba',done:!!savedNumPerson},
+    {label:'Numerologia — Relacja',done:!!savedNumRelation},
+    {label:'Numerologia — Firma',done:!!savedNumBusiness},
+  ];
+  el.innerHTML=items.map(i=>`<div class="status-row"><span class="dot ${i.done?'done':'pending'}"></span><span>${i.label} ${i.done?'— gotowe':'— oczekuje'}</span></div>`).join('');
+  const anyDone=items.some(i=>i.done);
+  document.getElementById('synth-btn').disabled=!anyDone;
+}
+
+// ── API ──
+async function callClaude(prompt,resultEl){
+  resultEl.style.display='block';resultEl.className='result-box visible loading';
+  resultEl.textContent='✦ Odczytuję energie… proszę czekać…';
+  try{
+    const resp=await fetch("https://api.anthropic.com/v1/messages",{
+      method:"POST",headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:1000,messages:[{role:"user",content:prompt}]})
+    });
+    const data=await resp.json();
+    resultEl.className='result-box visible';
+    const text=data.content?.[0]?.text||'Przepraszam, wystąpił błąd. Spróbuj ponownie.';
+    resultEl.textContent=text;return text;
+  } catch(e){
+    resultEl.className='result-box visible';
+    resultEl.textContent='Błąd połączenia. Sprawdź internet i spróbuj ponownie.';return '';
+  }
+}
+
+// ── ASTROLOGIA ──
+async function analyzeAstro(){
+  const bd=document.getElementById('birthdate').value,bp=document.getElementById('birthplace').value;
+  if(!bd||!bp){alert('Podaj datę urodzenia i miejsce urodzenia.');return;}
+  const name=document.getElementById('name').value,gender=document.getElementById('gender').value,
+    bt=document.getElementById('birthtime').value,focus=document.getElementById('focus').value,
+    mood=document.getElementById('mood').value,extra=document.getElementById('extra').value;
+  const btn=document.getElementById('astro-btn');btn.disabled=true;
+  savedAstroMeta={name,gender,birthdate:bd,birthtime:bt,birthplace:bp,focus,mood};
+  const prompt=`Jesteś doświadczoną astrologką. Piszesz zawsze po polsku. Stwórz głęboką, ciepłą analizę astrologiczną.
+Dane: Imię: ${name||'(nie podano)'}, Płeć: ${gender}, Data: ${bd}, Godzina: ${bt||'nieznana'}, Miejsce: ${bp}, Obszar: ${focus}${mood?', Nastrój: '+mood:''}${extra?'\nPytanie: '+extra:''}
+Opisz: 1.Znak Słońca 2.Znak Księżyca 3.Ascendent 4.Dominujące planety 5.Mocne strony 6.Obszary do pracy 7.Energia aktualnego okresu 8.Skupienie na obszarze zainteresowania 9.Zdanie-esencja. Ciepło, konkretnie, ~500 słów.`;
+  const result=await callClaude(prompt,document.getElementById('astro-result'));
+  if(result){savedAstro=result;document.getElementById('astro-pdf-row').style.display='flex';checkUnlock();}
+  btn.disabled=false;
+}
+
+// ── TAROT ──
+async function interpretTarot(){
+  const spread=SPREADS[currentSpread];const names=Object.keys(selectedCards);
+  if(names.length<spread.count){alert(`Wybierz jeszcze ${spread.count-names.length} kart dla tego układu.`);return;}
+  const selEl=document.getElementById('spread-select');
+  const spreadName=selEl.options[selEl.selectedIndex].text;
+  const question=document.getElementById('tarot-question').value;
+  const cardsDesc=names.map((n,i)=>`- ${spread.positions[i]||'Pozycja '+(i+1)}: ${n}${selectedCards[n]?' (ODWROCONA)':''}`).join('\n');
+  savedTarotMeta={spreadName,question,cards:names.map((n,i)=>({pos:spread.positions[i]||'',name:n,rev:selectedCards[n]}))};
+  const btn=document.getElementById('tarot-btn');btn.disabled=true;
+  const prompt=`Jesteś doświadczoną tarocistrką. Piszesz zawsze po polsku.\nUkład: ${spreadName}${question?'\nPytanie: '+question:''}\nKarty:\n${cardsDesc}\nStruktura: 1.Ogólna energia 2.Interpretacja każdej karty 3.Połączenia między kartami 4.Przesłanie i rada 5.Zdanie-esencja. ~500 słów.`;
+  const result=await callClaude(prompt,document.getElementById('tarot-result'));
+  if(result){savedTarot=result;document.getElementById('tarot-pdf-row').style.display='flex';checkUnlock();}
+  btn.disabled=false;
+}
+
+// ── NUMEROLOGIA ──
+async function analyzeNum(type){
+  let prompt='',resultEl,btnEl,pdfRowEl;
+
+  if(type==='person'){
+    const fn=document.getElementById('np-fullname').value,bd=document.getElementById('np-birthdate').value;
+    if(!fn||!bd){alert('Podaj imię, nazwisko i datę urodzenia.');return;}
+    const focus=document.getElementById('np-focus').value,extra=document.getElementById('np-extra').value;
+    savedNpMeta={fullname:fn,birthdate:bd,focus};
+    prompt=`Jesteś ekspertką numerologii. Piszesz zawsze po polsku. Wykonaj pełną analizę numerologiczną.
+Dane: Imię i nazwisko: ${fn}, Data urodzenia: ${bd}, Obszar: ${focus}${extra?'\nPytanie: '+extra:''}
+Oblicz i opisz:
+1. Liczba Życia (z daty urodzenia) — główna ścieżka życiowa
+2. Liczba Przeznaczenia (z pełnego imienia i nazwiska wg Pytag.) — cel duszy
+3. Liczba Duszy (z samogłosek) — ukryte pragnienia serca
+4. Liczba Osobowości (ze spółgłosek) — jak Cię postrzegają inni
+5. Liczba Urodzin (sam dzień urodzenia) — ukryty talent
+6. Rok Osobisty ${new Date().getFullYear()} — aktualna energia roczna
+7. Aktywny Cykl Życiowy — w jakiej fazie jesteś
+8. Skupienie na wybranym obszarze zainteresowania
+9. Zdanie-mantra dla tej osoby
+Przy każdej liczbie napisz jej wartość. Ciepło, konkretnie, ~500 słów.`;
+    resultEl=document.getElementById('np-result');btnEl=document.getElementById('np-btn');pdfRowEl=document.getElementById('np-pdf-row');
+  }
+
+  else if(type==='relation'){
+    const n1=document.getElementById('nr-name1').value,b1=document.getElementById('nr-birth1').value,
+      n2=document.getElementById('nr-name2').value,b2=document.getElementById('nr-birth2').value;
+    if(!n1||!b1||!n2||!b2){alert('Podaj dane obu osób.');return;}
+    const rtype=document.getElementById('nr-type').value,extra=document.getElementById('nr-extra').value;
+    savedNrMeta={name1:n1,birth1:b1,name2:n2,birth2:b2,rtype};
+    prompt=`Jesteś ekspertką numerologii. Piszesz zawsze po polsku. Wykonaj analizę kompatybilności numerologicznej.
+Osoba 1: ${n1}, ur. ${b1}
+Osoba 2: ${n2}, ur. ${b2}
+Charakter relacji: ${rtype}${extra?'\nPytanie: '+extra:''}
+Oblicz i opisz:
+1. Liczba Życia obu osób i co ta para oznacza razem
+2. Kompatybilność podstawowych liczb (Życia, Przeznaczenia)
+3. Dynamika relacji — mocne strony współpracy/związku
+4. Główne wyzwania i obszary napięć
+5. Czego mogą się od siebie nauczyć
+6. Energia roku ${new Date().getFullYear()} dla tej relacji
+7. Ogólna ocena kompatybilności i rada
+8. Zdanie-esencja dla tej pary
+Ciepło, konkretnie, ~500 słów.`;
+    resultEl=document.getElementById('nr-result');btnEl=document.getElementById('nr-btn');pdfRowEl=document.getElementById('nr-pdf-row');
+  }
+
+  else if(type==='business'){
+    const bname=document.getElementById('nb-name').value;
+    if(!bname){alert('Podaj nazwę firmy lub projektu.');return;}
+    const bdate=document.getElementById('nb-date').value,industry=document.getElementById('nb-industry').value,
+      owner=document.getElementById('nb-owner').value,focus=document.getElementById('nb-focus').value,extra=document.getElementById('nb-extra').value;
+    savedNbMeta={name:bname,date:bdate,industry,owner,focus};
+    prompt=`Jesteś ekspertką numerologii biznesowej. Piszesz zawsze po polsku. Wykonaj pełną analizę numerologiczną firmy.
+Nazwa firmy: ${bname}${bdate?'\nData założenia: '+bdate:''}${industry?'\nBranża: '+industry:''}${owner?'\nWłaściciel: '+owner:''}
+Obszar analizy: ${focus}${extra?'\nPytanie: '+extra:''}
+Oblicz i opisz:
+1. Liczba nazwy firmy (wg Pytag.) — Liczba Sukcesu, energia biznesu
+2. Energia daty założenia${bdate?' — co ten dzień wnosi':' — ogólna energia numeryczna'}
+3. Mocne strony tej nazwy i daty
+4. Potencjalne wyzwania numerologiczne
+5. Najlepsze okresy na działanie, inwestycje, decyzje w ${new Date().getFullYear()}
+6. Wskazówki dot. brandingu i kierunku rozwoju
+7. Kompatybilność z właścicielem${owner?' ('+owner+')':''}
+8. Jedna kluczowa rada numerologiczna
+Ciepło, konkretnie, ~500 słów.`;
+    resultEl=document.getElementById('nb-result');btnEl=document.getElementById('nb-btn');pdfRowEl=document.getElementById('nb-pdf-row');
+  }
+
+  btnEl.disabled=true;
+  const result=await callClaude(prompt,resultEl);
+  if(result){
+    if(type==='person') savedNumPerson=result;
+    else if(type==='relation') savedNumRelation=result;
+    else if(type==='business') savedNumBusiness=result;
+    pdfRowEl.style.display='flex';
+    checkUnlock();
+  }
+  btnEl.disabled=false;
+}
+
+// ── SYNTEZA ──
+async function runSynthesis(){
+  const parts=[];
+  if(savedAstro) parts.push('ANALIZA ASTROLOGICZNA:\n'+savedAstro);
+  if(savedTarot) parts.push('ODCZYT TAROTA:\n'+savedTarot);
+  if(savedNumPerson) parts.push('NUMEROLOGIA — OSOBA:\n'+savedNumPerson);
+  if(savedNumRelation) parts.push('NUMEROLOGIA — RELACJA:\n'+savedNumRelation);
+  if(savedNumBusiness) parts.push('NUMEROLOGIA — FIRMA:\n'+savedNumBusiness);
+  if(!parts.length) return;
+  const btn=document.getElementById('synth-btn');btn.disabled=true;
+  const prompt=`Jesteś mądrą przewodniczką duchową. Piszesz zawsze po polsku.
+Masz do dyspozycji następujące analizy:
+
+${parts.join('\n\n---\n\n')}
+
+---
+Stwórz SYNTEZĘ — jedną spójną, głęboką interpretację, która:
+1. Znajdzie wspólne motywy i wzajemne wzmocnienia między wszystkimi dostarczonymi analizami
+2. Wskaże gdzie różne systemy mówią to samo — i co to wzmocnienie oznacza
+3. Opisze główny temat życiowy tej osoby/sytuacji w tym momencie
+4. Poda konkretną, praktyczną radę wynikającą z połączenia źródeł
+5. Zakończy jednym zdaniem-mantrą lub afirmacją
+
+Pisz jak list do bliskiej przyjaciółki. Ciepło, konkretnie, bez banałów. ~400 słów.`;
+  const result=await callClaude(prompt,document.getElementById('synth-result'));
+  if(result){savedSynth=result;document.getElementById('synth-pdf-row').style.display='block';}
+  btn.disabled=false;
+}
+
+// ── PDF ──
+function downloadPDF(type){
+  const {jsPDF}=window.jspdf;
+  const doc=new jsPDF({orientation:'portrait',unit:'mm',format:'a4'});
+  const W=210,H=297,ML=20,MR=20,MT=22,TW=W-ML-MR;
+  const today=new Date().toLocaleDateString('pl-PL',{day:'2-digit',month:'long',year:'numeric'});
+
+  function sf(style,size,color){doc.setFont('times',style||'normal');doc.setFontSize(size||11);doc.setTextColor(color||'#2a2018');}
+  function header(title,sub){
+    doc.setFillColor(250,246,239);doc.rect(0,0,W,28,'F');
+    doc.setDrawColor(184,144,42);doc.setLineWidth(0.3);doc.line(ML,26,W-MR,26);
+    sf('normal',9,'#8a7a62');doc.text('Astrum & Arcana',ML,10);doc.text(today,W-MR,10,'right');
+    sf('normal',16,'#2a2018');doc.text(title,W/2,18,'center');
+    if(sub){sf('italic',9,'#8a7a62');doc.text(sub,W/2,24,'center');}
+  }
+  function footer(n){
+    doc.setDrawColor(184,144,42);doc.setLineWidth(0.2);doc.line(ML,H-12,W-MR,H-12);
+    sf('normal',8,'#8a7a62');doc.text('Astrum & Arcana · '+today,ML,H-7);doc.text('Strona '+n,W-MR,H-7,'right');
+  }
+  function metaBox(lines,y){
+    doc.setFillColor(253,249,242);doc.setDrawColor(184,144,42);doc.setLineWidth(0.3);
+    doc.rect(ML,y,TW,lines.length*6+6,'S');
+    sf('normal',9,'#5a4a32');lines.forEach((l,i)=>doc.text(l,ML+4,y+6+i*6));
+    return y+lines.length*6+10;
+  }
+  function textBlock(text,y,ptitle,psub){
+    sf('normal',11,'#2a2018');
+    const lines=doc.splitTextToSize(text,TW);
+    const lh=11*0.45;let cy=y;
+    for(let i=0;i<lines.length;i++){
+      if(cy>H-20){footer(doc.internal.getNumberOfPages());doc.addPage();header(ptitle||'',psub||'');cy=MT+8;}
+      doc.text(lines[i],ML,cy);cy+=lh+1.2;
+    }
+    return cy;
+  }
+
+  if(type==='astro'){
+    header('Analiza Astrologiczna','Raport osobisty');
+    const m=savedAstroMeta;let y=MT+8;
+    const meta=[];if(m.name)meta.push('Imię: '+m.name);
+    meta.push('Data: '+m.birthdate+(m.birthtime?' · Godzina: '+m.birthtime:''));
+    meta.push('Miejsce: '+m.birthplace+' · Płeć: '+m.gender+' · Obszar: '+m.focus);
+    y=metaBox(meta,y);textBlock(savedAstro,y,'Astrologia','(ciąg dalszy)');
+    footer(doc.internal.getNumberOfPages());doc.save('astrum-astrologia.pdf');
+  }
+  else if(type==='tarot'){
+    header('Odczyt Tarota','Interpretacja układu kart');
+    const m=savedTarotMeta;let y=MT+8;
+    const meta=['Układ: '+m.spreadName];if(m.question)meta.push('Pytanie: '+m.question);
+    meta.push('Karty: '+m.cards.map(c=>c.pos+': '+c.name+(c.rev?' (odwr.)':'')).join(' · '));
+    y=metaBox(meta,y);textBlock(savedTarot,y,'Tarot','(ciąg dalszy)');
+    footer(doc.internal.getNumberOfPages());doc.save('astrum-tarot.pdf');
+  }
+  else if(type==='num-person'){
+    header('Numerologia — Osoba','Pełna analiza numerologiczna');
+    const m=savedNpMeta;let y=MT+8;
+    y=metaBox(['Imię i nazwisko: '+m.fullname,'Data urodzenia: '+m.birthdate,'Obszar: '+m.focus],y);
+    textBlock(savedNumPerson,y,'Numerologia — Osoba','(ciąg dalszy)');
+    footer(doc.internal.getNumberOfPages());doc.save('astrum-numerologia-osoba.pdf');
+  }
+  else if(type==='num-relation'){
+    header('Numerologia — Relacja','Analiza kompatybilności');
+    const m=savedNrMeta;let y=MT+8;
+    y=metaBox(['Osoba 1: '+m.name1+' (ur. '+m.birth1+')','Osoba 2: '+m.name2+' (ur. '+m.birth2+')','Charakter relacji: '+m.rtype],y);
+    textBlock(savedNumRelation,y,'Numerologia — Relacja','(ciąg dalszy)');
+    footer(doc.internal.getNumberOfPages());doc.save('astrum-numerologia-relacja.pdf');
+  }
+  else if(type==='num-business'){
+    header('Numerologia — Firma','Analiza biznesowa');
+    const m=savedNbMeta;let y=MT+8;
+    const meta=['Firma: '+m.name];if(m.date)meta.push('Data założenia: '+m.date);if(m.industry)meta.push('Branża: '+m.industry);meta.push('Obszar: '+m.focus);
+    y=metaBox(meta,y);textBlock(savedNumBusiness,y,'Numerologia — Firma','(ciąg dalszy)');
+    footer(doc.internal.getNumberOfPages());doc.save('astrum-numerologia-firma.pdf');
+  }
+  else if(type==='synth'){
+    header('Synteza','Połączenie wszystkich analiz');let y=MT+8;
+    textBlock(savedSynth,y,'Synteza','(ciąg dalszy)');
+    footer(doc.internal.getNumberOfPages());doc.save('astrum-synteza.pdf');
+  }
+  else if(type==='full'){
+    // STRONA TYTUŁOWA
+    doc.setFillColor(250,246,239);doc.rect(0,0,W,H,'F');
+    doc.setDrawColor(184,144,42);doc.setLineWidth(0.5);doc.rect(10,10,W-20,H-20,'S');
+    doc.setLineWidth(0.2);doc.rect(12,12,W-24,H-24,'S');
+    sf('normal',10,'#b8902a');doc.text('☽  ✦  ☿',W/2,58,'center');
+    sf('normal',26,'#2a2018');doc.text('Astrum & Arcana',W/2,76,'center');
+    sf('italic',13,'#5a4a32');doc.text('Pelny Raport Osobisty',W/2,87,'center');
+    doc.setDrawColor(184,144,42);doc.setLineWidth(0.3);doc.line(50,93,W-50,93);
+    const m=savedAstroMeta;
+    if(m.name){sf('normal',13,'#2a2018');doc.text(m.name,W/2,106,'center');}
+    sf('normal',10,'#8a7a62');
+    if(m.birthdate)doc.text(m.birthdate+(m.birthplace?' · '+m.birthplace:''),W/2,115,'center');
+    sf('normal',9,'#8a7a62');
+    const parts2=[];if(savedAstro)parts2.push('Astrologia');if(savedTarot)parts2.push('Tarot');
+    if(savedNumPerson)parts2.push('Numerologia Osoby');if(savedNumRelation)parts2.push('Numerologia Relacji');
+    if(savedNumBusiness)parts2.push('Numerologia Firmy');if(savedSynth)parts2.push('Synteza');
+    doc.text(parts2.join(' · '),W/2,124,'center');
+    sf('italic',8,'#8a7a62');doc.text(today,W/2,H-20,'center');
+
+    let secNum=1;
+    function addSection(title,sub,meta,content,fname){
+      doc.addPage();header(title,'Część '+secNum+' — '+sub);let y=MT+8;secNum++;
+      if(meta&&meta.length) y=metaBox(meta,y);
+      textBlock(content,y,title,'(ciąg dalszy)');
+      footer(doc.internal.getNumberOfPages());
+    }
+
+    if(savedAstro){const m2=savedAstroMeta;const mt=[];if(m2.name)mt.push('Imię: '+m2.name);mt.push('Data: '+m2.birthdate+(m2.birthtime?' · Godzina: '+m2.birthtime:''));mt.push('Miejsce: '+m2.birthplace+' · Płeć: '+m2.gender);addSection('Analiza Astrologiczna','Astrologia',mt,savedAstro);}
+    if(savedTarot){const m2=savedTarotMeta;const mt=['Układ: '+m2.spreadName];if(m2.question)mt.push('Pytanie: '+m2.question);mt.push('Karty: '+m2.cards.map(c=>c.pos+': '+c.name+(c.rev?' (odwr.)':'')).join(', '));addSection('Odczyt Tarota','Tarot',mt,savedTarot);}
+    if(savedNumPerson){const m2=savedNpMeta;addSection('Numerologia Osoby','Numerologia',['Imię: '+m2.fullname,'Data: '+m2.birthdate,'Obszar: '+m2.focus],savedNumPerson);}
+    if(savedNumRelation){const m2=savedNrMeta;addSection('Numerologia Relacji','Kompatybilność',['Osoba 1: '+m2.name1+' (ur. '+m2.birth1+')','Osoba 2: '+m2.name2+' (ur. '+m2.birth2+')','Relacja: '+m2.rtype],savedNumRelation);}
+    if(savedNumBusiness){const m2=savedNbMeta;const mt=['Firma: '+m2.name];if(m2.date)mt.push('Data: '+m2.date);if(m2.industry)mt.push('Branża: '+m2.industry);addSection('Numerologia Firmy','Biznes',mt,savedNumBusiness);}
+    if(savedSynth) addSection('Synteza','Połączenie analiz',[],savedSynth);
+
+    doc.save('astrum-pelny-raport.pdf');
+  }
+}
+
+// ── CLEAR ──
+function clearSection(section){
+  function resetResult(id,pdfRowId){
+    const r=document.getElementById(id);r.textContent='';r.className='result-box';r.style.display='none';
+    if(pdfRowId)document.getElementById(pdfRowId).style.display='none';
+  }
+
+  if(section==='astro'){
+    ['name','birthplace','extra'].forEach(id=>document.getElementById(id).value='');
+    ['birthdate','birthtime'].forEach(id=>document.getElementById(id).value='');
+    document.getElementById('gender').selectedIndex=0;
+    document.getElementById('focus').selectedIndex=0;
+    document.getElementById('mood').selectedIndex=0;
+    resetResult('astro-result','astro-pdf-row');
+    savedAstro='';savedAstroMeta={};
+  }
+
+  else if(section==='tarot'){
+    document.getElementById('tarot-question').value='';
+    document.getElementById('spread-select').selectedIndex=0;
+    document.getElementById('rev-mode').checked=false;
+    selectedCards={};
+    document.querySelectorAll('.chip').forEach(c=>c.className='chip');
+    updateSpread();
+    resetResult('tarot-result','tarot-pdf-row');
+    savedTarot='';savedTarotMeta={};
+  }
+
+  else if(section==='num'){
+    // wyczyść aktywną zakładkę
+    const active=document.querySelector('.inner-panel.active');
+    if(!active) return;
+    active.querySelectorAll('input[type="text"],input[type="date"],textarea').forEach(el=>el.value='');
+    active.querySelectorAll('select').forEach(el=>el.selectedIndex=0);
+    if(active.id==='num-person'){resetResult('np-result','np-pdf-row');savedNumPerson='';savedNpMeta={};}
+    else if(active.id==='num-relation'){resetResult('nr-result','nr-pdf-row');savedNumRelation='';savedNrMeta={};}
+    else if(active.id==='num-business'){resetResult('nb-result','nb-pdf-row');savedNumBusiness='';savedNbMeta={};}
+  }
+
+  else if(section==='synth'){
+    resetResult('synth-result',null);
+    document.getElementById('synth-pdf-row').style.display='none';
+    savedSynth='';
+  }
+
+  checkUnlock();
+  updateSynthStatus();
+}
+
+updateSynthStatus();
+</script>
+</body>
+</html>
