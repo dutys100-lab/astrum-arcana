@@ -309,13 +309,13 @@ textarea{resize:vertical;min-height:52px;}
     <!-- ══════════ SYNTEZA ══════════ -->
     <div class="section" id="sec-synth">
       <div class="sec-header" style="display:flex;align-items:flex-start;justify-content:space-between;gap:1rem;">
-        <div><h2><span>◈</span> Synteza</h2><p>Wszystkie analizy połączone w jeden przekaz</p></div>
+        <div><h2><span>◈</span> Synteza</h2><p>Wybierz analizy do połączenia</p></div>
         <button class="btn-clear" onclick="clearSection('synth')" title="Wyczyść syntezę">↺ Wyczyść</button>
       </div>
       <div class="synth-intro">
-        <h3>Czym jest Synteza?</h3>
-        Synteza łączy gotowe analizy z Astrologii, Tarota i Numerologii w jeden głęboki, spójny obraz. AI znajdzie wspólne motywy, powtarzające się wzorce i wzmocnienia między wszystkimi trzema źródłami — i stworzy całościowy przekaz specjalnie dla Ciebie.
-        <div class="synth-status" id="synth-status"></div>
+        <h3>Wybierz co chcesz połączyć</h3>
+        Zaznacz analizy, które mają wejść do Syntezy. Możesz łączyć dowolne kombinacje — np. tylko Astrologia + Tarot, albo wszystkie razem.
+        <div id="synth-checkboxes" style="margin-top:1rem;display:flex;flex-direction:column;gap:8px;"></div>
       </div>
       <button class="btn-main" id="synth-btn" onclick="runSynthesis()">◈ Stwórz Syntezę</button>
       <div class="result-box" id="synth-result"></div>
@@ -432,38 +432,30 @@ function checkUnlock(){
   if(hasMin){
     nav.classList.remove('locked');nav.classList.add('unlocked');hint.style.display='none';
   }
+  renderSynthCheckboxes();
 }
 function updateSynthStatus(){
-  const el=document.getElementById('synth-status');
-  const items=[
-    {label:'Astrologia',done:!!savedAstro},
-    {label:'Tarot',done:!!savedTarot},
-    {label:'Numerologia — Osoba',done:!!savedNumPerson},
-    {label:'Numerologia — Relacja',done:!!savedNumRelation},
-    {label:'Numerologia — Firma',done:!!savedNumBusiness},
-  ];
-  el.innerHTML=items.map(i=>`<div class="status-row"><span class="dot ${i.done?'done':'pending'}"></span><span>${i.label} ${i.done?'— gotowe':'— oczekuje'}</span></div>`).join('');
-  const anyDone=items.some(i=>i.done);
-  document.getElementById('synth-btn').disabled=!anyDone;
+  renderSynthCheckboxes();
 }
 
 // ── API ──
-const GEMINI_KEY='AQ.Ab8RN6IFdCnsNivZk8P13IjF9ymHtHLpz_UYkyUNUZzNnRn3fA';
+const GEMINI_KEY='AIzaSyATzbvKNd8G6W6H9U1m8C9lbYo6nfSThuw';
 async function callClaude(prompt,resultEl){
   resultEl.style.display='block';resultEl.className='result-box visible loading';
   resultEl.textContent='✦ Odczytuję energie… proszę czekać…';
   try{
-    const resp=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_KEY}`,{
-      method:"POST",headers:{"Content-Type":"application/json"},
+    const resp=await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key='+GEMINI_KEY,{
+      method:'POST',headers:{'Content-Type':'application/json'},
       body:JSON.stringify({contents:[{parts:[{text:prompt}]}],generationConfig:{maxOutputTokens:1500,temperature:0.85}})
     });
     const data=await resp.json();
+    if(data.error){resultEl.className='result-box visible';resultEl.textContent='Błąd API: '+data.error.message;return '';}
     resultEl.className='result-box visible';
     const text=data.candidates?.[0]?.content?.parts?.[0]?.text||'Przepraszam, wystąpił błąd. Spróbuj ponownie.';
     resultEl.textContent=text;return text;
   } catch(e){
     resultEl.className='result-box visible';
-    resultEl.textContent='Błąd połączenia. Sprawdź internet i spróbuj ponownie.';return '';
+    resultEl.textContent='Błąd połączenia: '+e.message;return '';
   }
 }
 
@@ -583,29 +575,42 @@ Ciepło, konkretnie, ~500 słów.`;
 }
 
 // ── SYNTEZA ──
+const SYNTH_SOURCES=[
+  {key:'astro',label:'Astrologia',getData:()=>savedAstro,title:'ANALIZA ASTROLOGICZNA'},
+  {key:'tarot',label:'Tarot',getData:()=>savedTarot,title:'ODCZYT TAROTA'},
+  {key:'num-person',label:'Numerologia — Osoba',getData:()=>savedNumPerson,title:'NUMEROLOGIA OSOBY'},
+  {key:'num-relation',label:'Numerologia — Relacja',getData:()=>savedNumRelation,title:'NUMEROLOGIA RELACJI'},
+  {key:'num-business',label:'Numerologia — Firma',getData:()=>savedNumBusiness,title:'NUMEROLOGIA FIRMY'},
+];
+
+function renderSynthCheckboxes(){
+  const box=document.getElementById('synth-checkboxes');
+  if(!box) return;
+  box.innerHTML='';
+  let any=false;
+  SYNTH_SOURCES.forEach(src=>{
+    if(!src.getData()) return;
+    any=true;
+    const row=document.createElement('label');
+    row.style.cssText='display:flex;align-items:center;gap:8px;cursor:pointer;font-size:0.9rem;color:var(--ink-mid);';
+    row.innerHTML='<input type="checkbox" id="chk-'+src.key+'" checked style="width:auto;cursor:pointer;accent-color:var(--gold);"> '+src.label+' <span style="font-size:0.72rem;color:var(--gold);font-family:Cinzel,serif;letter-spacing:0.05em;">— gotowa</span>';
+    box.appendChild(row);
+  });
+  if(!any) box.innerHTML='<span style="font-size:0.85rem;color:var(--ink-soft);font-style:italic;">Wykonaj przynajmniej jedną analizę, aby odblokować Syntezę.</span>';
+  const btn=document.getElementById('synth-btn');
+  if(btn) btn.disabled=!any;
+}
+
 async function runSynthesis(){
   const parts=[];
-  if(savedAstro) parts.push('ANALIZA ASTROLOGICZNA:\n'+savedAstro);
-  if(savedTarot) parts.push('ODCZYT TAROTA:\n'+savedTarot);
-  if(savedNumPerson) parts.push('NUMEROLOGIA — OSOBA:\n'+savedNumPerson);
-  if(savedNumRelation) parts.push('NUMEROLOGIA — RELACJA:\n'+savedNumRelation);
-  if(savedNumBusiness) parts.push('NUMEROLOGIA — FIRMA:\n'+savedNumBusiness);
-  if(!parts.length) return;
+  SYNTH_SOURCES.forEach(src=>{
+    const chk=document.getElementById('chk-'+src.key);
+    if(chk&&chk.checked&&src.getData()) parts.push(src.title+':\n'+src.getData());
+  });
+  if(!parts.length){alert('Zaznacz co najmniej jedną analizę.');return;}
   const btn=document.getElementById('synth-btn');btn.disabled=true;
-  const prompt=`Jesteś mądrą przewodniczką duchową. Piszesz zawsze po polsku.
-Masz do dyspozycji następujące analizy:
-
-${parts.join('\n\n---\n\n')}
-
----
-Stwórz SYNTEZĘ — jedną spójną, głęboką interpretację, która:
-1. Znajdzie wspólne motywy i wzajemne wzmocnienia między wszystkimi dostarczonymi analizami
-2. Wskaże gdzie różne systemy mówią to samo — i co to wzmocnienie oznacza
-3. Opisze główny temat życiowy tej osoby/sytuacji w tym momencie
-4. Poda konkretną, praktyczną radę wynikającą z połączenia źródeł
-5. Zakończy jednym zdaniem-mantrą lub afirmacją
-
-Pisz jak list do bliskiej przyjaciółki. Ciepło, konkretnie, bez banałów. ~400 słów.`;
+  const joined=parts.join('\n\n---\n\n');
+  const prompt='Jesteś mądrą przewodniczką duchową. Piszesz zawsze po polsku.\nMasz do dyspozycji następujące analizy:\n\n'+joined+'\n\n---\nStwórz SYNTEZĘ — jedną spójną, głęboką interpretację, która:\n1. Znajdzie wspólne motywy i wzajemne wzmocnienia między dostarczonymi analizami\n2. Wskaże gdzie różne systemy mówią to samo\n3. Opisze główny temat życiowy tej osoby w tym momencie\n4. Poda konkretną, praktyczną radę\n5. Zakończy jednym zdaniem-mantrą\n\nPisz jak list do bliskiej przyjaciółki. Ciepło, konkretnie. ~400 słów.';
   const result=await callClaude(prompt,document.getElementById('synth-result'));
   if(result){savedSynth=result;document.getElementById('synth-pdf-row').style.display='block';}
   btn.disabled=false;
