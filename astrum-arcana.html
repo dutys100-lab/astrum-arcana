@@ -439,19 +439,20 @@ function updateSynthStatus(){
 }
 
 // ── API ──
-const GEMINI_KEY='AIzaSyATzbvKNd8G6W6H9U1m8C9lbYo6nfSThuw';
+const OR_KEY='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';
 async function callClaude(prompt,resultEl){
   resultEl.style.display='block';resultEl.className='result-box visible loading';
   resultEl.textContent='✦ Odczytuję energie… proszę czekać…';
   try{
-    const resp=await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key='+GEMINI_KEY,{
-      method:'POST',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({contents:[{parts:[{text:prompt}]}],generationConfig:{maxOutputTokens:1500,temperature:0.85}})
+    const resp=await fetch('https://openrouter.ai/api/v1/chat/completions',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','Authorization':'Bearer '+OR_KEY,'HTTP-Referer':'https://dutys100-lab.github.io','X-Title':'Astrum & Arcana'},
+      body:JSON.stringify({model:'mistralai/mistral-7b-instruct:free',messages:[{role:'user',content:prompt}],max_tokens:1500})
     });
     const data=await resp.json();
     if(data.error){resultEl.className='result-box visible';resultEl.textContent='Błąd API: '+data.error.message;return '';}
     resultEl.className='result-box visible';
-    const text=data.candidates?.[0]?.content?.parts?.[0]?.text||'Przepraszam, wystąpił błąd. Spróbuj ponownie.';
+    const text=data.choices?.[0]?.message?.content||'Przepraszam, wystąpił błąd. Spróbuj ponownie.';
     resultEl.textContent=text;return text;
   } catch(e){
     resultEl.className='result-box visible';
