@@ -494,7 +494,7 @@ ${focus !== 'Pełna analiza' ? 'Skupienie na obszarze — '+focus+': poświęć 
 
 Na końcu jedno piękne zdanie-mantra dla tej duszy — krótkie, mocne, zapamiętane na długo.
 
-Minimum 800 słów. Żadnych gwiazdek, gwiazdek markdown, hashtagów ani numerów.\`
+Minimum 800 słów. Żadnych gwiazdek, gwiazdek markdown, hashtagów ani numerów.`;
   const result=await callClaude(prompt,document.getElementById('astro-result'));
   if(result){savedAstro=result;document.getElementById('astro-pdf-row').style.display='flex';checkUnlock();}
   btn.disabled=false;
@@ -529,7 +529,7 @@ Zakończ głównym przesłaniem i konkretną, ciepłą radą — co ta osoba pow
 
 Na samym końcu jedno krótkie zdanie-esencja całego przekazu.
 
-Minimum 800 słów. Żadnych gwiazdek, hashtagów ani numerów.\`
+Minimum 800 słów. Żadnych gwiazdek, hashtagów ani numerów.`;
   const result=await callClaude(prompt,document.getElementById('tarot-result'));
   if(result){savedTarot=result;document.getElementById('tarot-pdf-row').style.display='flex';checkUnlock();}
   btn.disabled=false;
@@ -569,7 +569,7 @@ ${focus !== 'Pełna analiza' ? 'Skupienie na obszarze — '+focus+': napisz osob
 
 Zakończ jednym pięknym zdaniem-mantrą dla tej duszy.
 
-Minimum 800 słów. Żadnych gwiazdek, hashtagów ani numerów.\`
+Minimum 800 słów. Żadnych gwiazdek, hashtagów ani numerów.`;
     resultEl=document.getElementById('np-result');btnEl=document.getElementById('np-btn');pdfRowEl=document.getElementById('np-pdf-row');
   }
 
