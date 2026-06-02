@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Astrum & Arcana</title>
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600&family=EB+Garamond:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
@@ -447,7 +447,7 @@ async function callClaude(prompt,resultEl){
     const resp=await fetch('https://api.groq.com/openai/v1/chat/completions',{
       method:'POST',
       headers:{'Content-Type':'application/json','Authorization':'Bearer '+GROQ_KEY},
-      body:JSON.stringify({model:'llama-3.3-70b-versatile',messages:[{role:'user',content:prompt}],max_tokens:1500,temperature:0.85})
+      body:JSON.stringify({model:'llama-3.3-70b-versatile',messages:[{role:'user',content:prompt}],max_tokens:3000,temperature:0.85})
     });
     const data=await resp.json();
     if(data.error){resultEl.className='result-box visible';resultEl.textContent='Błąd API: '+data.error.message;return '';}
@@ -471,7 +471,7 @@ async function analyzeAstro(){
   savedAstroMeta={name,gender,birthdate:bd,birthtime:bt,birthplace:bp,focus,mood};
   const prompt=`Jesteś doświadczoną astrologką. Piszesz zawsze po polsku. Stwórz głęboką, ciepłą analizę astrologiczną.
 Dane: Imię: ${name||'(nie podano)'}, Płeć: ${gender}, Data: ${bd}, Godzina: ${bt||'nieznana'}, Miejsce: ${bp}, Obszar: ${focus}${mood?', Nastrój: '+mood:''}${extra?'\nPytanie: '+extra:''}
-Opisz: 1.Znak Słońca 2.Znak Księżyca 3.Ascendent 4.Dominujące planety 5.Mocne strony 6.Obszary do pracy 7.Energia aktualnego okresu 8.Skupienie na obszarze zainteresowania 9.Zdanie-esencja. Ciepło, konkretnie, ~500 słów.`;
+Opisz: 1.Znak Słońca 2.Znak Księżyca 3.Ascendent 4.Dominujące planety 5.Mocne strony 6.Obszary do pracy 7.Energia aktualnego okresu 8.Skupienie na obszarze zainteresowania 9.Zdanie-esencja. Pisz ciepło, głęboko i rozbudowanie. Każdy punkt opisz szczegółowo — minimum 3-4 zdania. Nie stosuj gwiazdek ani markdown. Pisz płynną prozą. Minimum 700 słów.`;
   const result=await callClaude(prompt,document.getElementById('astro-result'));
   if(result){savedAstro=result;document.getElementById('astro-pdf-row').style.display='flex';checkUnlock();}
   btn.disabled=false;
@@ -514,7 +514,7 @@ Oblicz i opisz:
 7. Aktywny Cykl Życiowy — w jakiej fazie jesteś
 8. Skupienie na wybranym obszarze zainteresowania
 9. Zdanie-mantra dla tej osoby
-Przy każdej liczbie napisz jej wartość. Ciepło, konkretnie, ~500 słów.`;
+Przy każdej liczbie napisz jej wartość. Pisz ciepło, głęboko i rozbudowanie. Każdy punkt opisz szczegółowo — minimum 3-4 zdania. Nie stosuj gwiazdek ani markdown. Pisz płynną prozą. Minimum 700 słów.`;
     resultEl=document.getElementById('np-result');btnEl=document.getElementById('np-btn');pdfRowEl=document.getElementById('np-pdf-row');
   }
 
@@ -537,7 +537,7 @@ Oblicz i opisz:
 6. Energia roku ${new Date().getFullYear()} dla tej relacji
 7. Ogólna ocena kompatybilności i rada
 8. Zdanie-esencja dla tej pary
-Ciepło, konkretnie, ~500 słów.`;
+Pisz ciepło, głęboko i rozbudowanie. Każdy punkt opisz szczegółowo — minimum 3-4 zdania. Nie stosuj gwiazdek ani markdown. Pisz płynną prozą. Minimum 700 słów.`;
     resultEl=document.getElementById('nr-result');btnEl=document.getElementById('nr-btn');pdfRowEl=document.getElementById('nr-pdf-row');
   }
 
@@ -559,7 +559,7 @@ Oblicz i opisz:
 6. Wskazówki dot. brandingu i kierunku rozwoju
 7. Kompatybilność z właścicielem${owner?' ('+owner+')':''}
 8. Jedna kluczowa rada numerologiczna
-Ciepło, konkretnie, ~500 słów.`;
+Pisz ciepło, głęboko i rozbudowanie. Każdy punkt opisz szczegółowo — minimum 3-4 zdania. Nie stosuj gwiazdek ani markdown. Pisz płynną prozą. Minimum 700 słów.`;
     resultEl=document.getElementById('nb-result');btnEl=document.getElementById('nb-btn');pdfRowEl=document.getElementById('nb-pdf-row');
   }
 
@@ -618,170 +618,140 @@ async function runSynthesis(){
 }
 
 // ── PDF ──
-function downloadPDF(type){
-  const {jsPDF}=window.jspdf;
-  const doc=new jsPDF({orientation:'portrait',unit:'mm',format:'a4'});
-  const W=210,H=297,ML=20,MR=20,MT=22,TW=W-ML-MR;
-  const today=new Date().toLocaleDateString('pl-PL',{day:'2-digit',month:'long',year:'numeric'});
-
-  function sf(style,size,color){doc.setFont('times',style||'normal');doc.setFontSize(size||11);doc.setTextColor(color||'#2a2018');}
-  function header(title,sub){
-    doc.setFillColor(250,246,239);doc.rect(0,0,W,28,'F');
-    doc.setDrawColor(184,144,42);doc.setLineWidth(0.3);doc.line(ML,26,W-MR,26);
-    sf('normal',9,'#8a7a62');doc.text('Astrum & Arcana',ML,10);doc.text(today,W-MR,10,'right');
-    sf('normal',16,'#2a2018');doc.text(title,W/2,18,'center');
-    if(sub){sf('italic',9,'#8a7a62');doc.text(sub,W/2,24,'center');}
-  }
-  function footer(n){
-    doc.setDrawColor(184,144,42);doc.setLineWidth(0.2);doc.line(ML,H-12,W-MR,H-12);
-    sf('normal',8,'#8a7a62');doc.text('Astrum & Arcana · '+today,ML,H-7);doc.text('Strona '+n,W-MR,H-7,'right');
-  }
-  function metaBox(lines,y){
-    doc.setFillColor(253,249,242);doc.setDrawColor(184,144,42);doc.setLineWidth(0.3);
-    doc.rect(ML,y,TW,lines.length*6+6,'S');
-    sf('normal',9,'#5a4a32');lines.forEach((l,i)=>doc.text(l,ML+4,y+6+i*6));
-    return y+lines.length*6+10;
-  }
-  function textBlock(text,y,ptitle,psub){
-    sf('normal',11,'#2a2018');
-    const lines=doc.splitTextToSize(text,TW);
-    const lh=11*0.45;let cy=y;
-    for(let i=0;i<lines.length;i++){
-      if(cy>H-20){footer(doc.internal.getNumberOfPages());doc.addPage();header(ptitle||'',psub||'');cy=MT+8;}
-      doc.text(lines[i],ML,cy);cy+=lh+1.2;
-    }
-    return cy;
-  }
-
-  if(type==='astro'){
-    header('Analiza Astrologiczna','Raport osobisty');
-    const m=savedAstroMeta;let y=MT+8;
-    const meta=[];if(m.name)meta.push('Imię: '+m.name);
-    meta.push('Data: '+m.birthdate+(m.birthtime?' · Godzina: '+m.birthtime:''));
-    meta.push('Miejsce: '+m.birthplace+' · Płeć: '+m.gender+' · Obszar: '+m.focus);
-    y=metaBox(meta,y);textBlock(savedAstro,y,'Astrologia','(ciąg dalszy)');
-    footer(doc.internal.getNumberOfPages());doc.save('astrum-astrologia.pdf');
-  }
-  else if(type==='tarot'){
-    header('Odczyt Tarota','Interpretacja układu kart');
-    const m=savedTarotMeta;let y=MT+8;
-    const meta=['Układ: '+m.spreadName];if(m.question)meta.push('Pytanie: '+m.question);
-    meta.push('Karty: '+m.cards.map(c=>c.pos+': '+c.name+(c.rev?' (odwr.)':'')).join(' · '));
-    y=metaBox(meta,y);textBlock(savedTarot,y,'Tarot','(ciąg dalszy)');
-    footer(doc.internal.getNumberOfPages());doc.save('astrum-tarot.pdf');
-  }
-  else if(type==='num-person'){
-    header('Numerologia — Osoba','Pełna analiza numerologiczna');
-    const m=savedNpMeta;let y=MT+8;
-    y=metaBox(['Imię i nazwisko: '+m.fullname,'Data urodzenia: '+m.birthdate,'Obszar: '+m.focus],y);
-    textBlock(savedNumPerson,y,'Numerologia — Osoba','(ciąg dalszy)');
-    footer(doc.internal.getNumberOfPages());doc.save('astrum-numerologia-osoba.pdf');
-  }
-  else if(type==='num-relation'){
-    header('Numerologia — Relacja','Analiza kompatybilności');
-    const m=savedNrMeta;let y=MT+8;
-    y=metaBox(['Osoba 1: '+m.name1+' (ur. '+m.birth1+')','Osoba 2: '+m.name2+' (ur. '+m.birth2+')','Charakter relacji: '+m.rtype],y);
-    textBlock(savedNumRelation,y,'Numerologia — Relacja','(ciąg dalszy)');
-    footer(doc.internal.getNumberOfPages());doc.save('astrum-numerologia-relacja.pdf');
-  }
-  else if(type==='num-business'){
-    header('Numerologia — Firma','Analiza biznesowa');
-    const m=savedNbMeta;let y=MT+8;
-    const meta=['Firma: '+m.name];if(m.date)meta.push('Data założenia: '+m.date);if(m.industry)meta.push('Branża: '+m.industry);meta.push('Obszar: '+m.focus);
-    y=metaBox(meta,y);textBlock(savedNumBusiness,y,'Numerologia — Firma','(ciąg dalszy)');
-    footer(doc.internal.getNumberOfPages());doc.save('astrum-numerologia-firma.pdf');
-  }
-  else if(type==='synth'){
-    header('Synteza','Połączenie wszystkich analiz');let y=MT+8;
-    textBlock(savedSynth,y,'Synteza','(ciąg dalszy)');
-    footer(doc.internal.getNumberOfPages());doc.save('astrum-synteza.pdf');
-  }
-  else if(type==='full'){
-    // STRONA TYTUŁOWA
-    doc.setFillColor(250,246,239);doc.rect(0,0,W,H,'F');
-    doc.setDrawColor(184,144,42);doc.setLineWidth(0.5);doc.rect(10,10,W-20,H-20,'S');
-    doc.setLineWidth(0.2);doc.rect(12,12,W-24,H-24,'S');
-    sf('normal',10,'#b8902a');doc.text('☽  ✦  ☿',W/2,58,'center');
-    sf('normal',26,'#2a2018');doc.text('Astrum & Arcana',W/2,76,'center');
-    sf('italic',13,'#5a4a32');doc.text('Pelny Raport Osobisty',W/2,87,'center');
-    doc.setDrawColor(184,144,42);doc.setLineWidth(0.3);doc.line(50,93,W-50,93);
-    const m=savedAstroMeta;
-    if(m.name){sf('normal',13,'#2a2018');doc.text(m.name,W/2,106,'center');}
-    sf('normal',10,'#8a7a62');
-    if(m.birthdate)doc.text(m.birthdate+(m.birthplace?' · '+m.birthplace:''),W/2,115,'center');
-    sf('normal',9,'#8a7a62');
-    const parts2=[];if(savedAstro)parts2.push('Astrologia');if(savedTarot)parts2.push('Tarot');
-    if(savedNumPerson)parts2.push('Numerologia Osoby');if(savedNumRelation)parts2.push('Numerologia Relacji');
-    if(savedNumBusiness)parts2.push('Numerologia Firmy');if(savedSynth)parts2.push('Synteza');
-    doc.text(parts2.join(' · '),W/2,124,'center');
-    sf('italic',8,'#8a7a62');doc.text(today,W/2,H-20,'center');
-
-    let secNum=1;
-    function addSection(title,sub,meta,content,fname){
-      doc.addPage();header(title,'Część '+secNum+' — '+sub);let y=MT+8;secNum++;
-      if(meta&&meta.length) y=metaBox(meta,y);
-      textBlock(content,y,title,'(ciąg dalszy)');
-      footer(doc.internal.getNumberOfPages());
-    }
-
-    if(savedAstro){const m2=savedAstroMeta;const mt=[];if(m2.name)mt.push('Imię: '+m2.name);mt.push('Data: '+m2.birthdate+(m2.birthtime?' · Godzina: '+m2.birthtime:''));mt.push('Miejsce: '+m2.birthplace+' · Płeć: '+m2.gender);addSection('Analiza Astrologiczna','Astrologia',mt,savedAstro);}
-    if(savedTarot){const m2=savedTarotMeta;const mt=['Układ: '+m2.spreadName];if(m2.question)mt.push('Pytanie: '+m2.question);mt.push('Karty: '+m2.cards.map(c=>c.pos+': '+c.name+(c.rev?' (odwr.)':'')).join(', '));addSection('Odczyt Tarota','Tarot',mt,savedTarot);}
-    if(savedNumPerson){const m2=savedNpMeta;addSection('Numerologia Osoby','Numerologia',['Imię: '+m2.fullname,'Data: '+m2.birthdate,'Obszar: '+m2.focus],savedNumPerson);}
-    if(savedNumRelation){const m2=savedNrMeta;addSection('Numerologia Relacji','Kompatybilność',['Osoba 1: '+m2.name1+' (ur. '+m2.birth1+')','Osoba 2: '+m2.name2+' (ur. '+m2.birth2+')','Relacja: '+m2.rtype],savedNumRelation);}
-    if(savedNumBusiness){const m2=savedNbMeta;const mt=['Firma: '+m2.name];if(m2.date)mt.push('Data: '+m2.date);if(m2.industry)mt.push('Branża: '+m2.industry);addSection('Numerologia Firmy','Biznes',mt,savedNumBusiness);}
-    if(savedSynth) addSection('Synteza','Połączenie analiz',[],savedSynth);
-
-    doc.save('astrum-pelny-raport.pdf');
-  }
+function buildPDFHTML(title, subtitle, metaLines, bodyText){
+  const metaRows = metaLines.map(l=>`<tr><td style="padding:3px 8px;font-size:13px;color:#5a4a32;">${l}</td></tr>`).join('');
+  const today = new Date().toLocaleDateString('pl-PL',{day:'2-digit',month:'long',year:'numeric'});
+  return `
+  <div style="font-family:Georgia,serif;color:#2a2018;padding:20px 30px;max-width:700px;margin:0 auto;">
+    <div style="background:#faf6ef;padding:12px 20px;border-bottom:2px solid #b8902a;margin-bottom:20px;display:flex;justify-content:space-between;align-items:center;">
+      <span style="font-family:Georgia,serif;font-size:13px;color:#8a7a62;">Astrum &amp; Arcana</span>
+      <span style="font-family:Georgia,serif;font-size:13px;color:#8a7a62;">${today}</span>
+    </div>
+    <h1 style="font-family:Georgia,serif;font-size:26px;font-weight:normal;text-align:center;color:#2a2018;margin:0 0 6px;">${title}</h1>
+    <p style="text-align:center;font-style:italic;color:#8a7a62;font-size:14px;margin:0 0 20px;">${subtitle}</p>
+    <table style="width:100%;border:1px solid #e8d5a0;background:#fdf9f2;border-radius:4px;margin-bottom:24px;border-collapse:collapse;">
+      ${metaRows}
+    </table>
+    <div style="font-size:15px;line-height:1.9;color:#2a2018;white-space:pre-wrap;">${bodyText.replace(/\*\*/g,'').replace(/\*/g,'')}</div>
+    <div style="margin-top:40px;padding-top:12px;border-top:1px solid #e8d5a0;font-size:11px;color:#8a7a62;text-align:center;">
+      Astrum &amp; Arcana &nbsp;·&nbsp; ${today}
+    </div>
+  </div>`;
 }
 
-// ── CLEAR ──
-function clearSection(section){
-  function resetResult(id,pdfRowId){
-    const r=document.getElementById(id);r.textContent='';r.className='result-box';r.style.display='none';
-    if(pdfRowId)document.getElementById(pdfRowId).style.display='none';
-  }
+function buildCoverHTML(parts){
+  const today = new Date().toLocaleDateString('pl-PL',{day:'2-digit',month:'long',year:'numeric'});
+  const m = savedAstroMeta;
+  return `
+  <div style="font-family:Georgia,serif;color:#2a2018;min-height:1050px;display:flex;flex-direction:column;align-items:center;justify-content:center;background:#faf6ef;padding:60px 40px;text-align:center;">
+    <div style="font-size:28px;color:#d4aa4a;letter-spacing:0.4em;margin-bottom:24px;">☽ ✦ ☿</div>
+    <h1 style="font-size:36px;font-weight:normal;letter-spacing:0.1em;margin:0 0 10px;">Astrum &amp; Arcana</h1>
+    <p style="font-style:italic;font-size:16px;color:#5a4a32;margin:0 0 30px;">Pełny Raport Osobisty</p>
+    <div style="width:120px;height:1px;background:#b8902a;margin:0 auto 30px;"></div>
+    ${m.name?`<p style="font-size:20px;margin:0 0 10px;">${m.name}</p>`:''}
+    ${m.birthdate?`<p style="font-size:14px;color:#8a7a62;margin:0 0 6px;">${m.birthdate}${m.birthplace?' · '+m.birthplace:''}</p>`:''}
+    <p style="font-size:13px;color:#8a7a62;margin:20px 0 0;">${parts.join(' · ')}</p>
+    <p style="font-size:12px;color:#8a7a62;margin-top:60px;">${today}</p>
+  </div>`;
+}
 
-  if(section==='astro'){
-    ['name','birthplace','extra'].forEach(id=>document.getElementById(id).value='');
-    ['birthdate','birthtime'].forEach(id=>document.getElementById(id).value='');
-    document.getElementById('gender').selectedIndex=0;
-    document.getElementById('focus').selectedIndex=0;
-    document.getElementById('mood').selectedIndex=0;
-    resetResult('astro-result','astro-pdf-row');
-    savedAstro='';savedAstroMeta={};
-  }
+const PDF_OPTS = {
+  margin:[10,10,10,10],
+  filename:'raport.pdf',
+  html2canvas:{scale:2,useCORS:true},
+  jsPDF:{unit:'mm',format:'a4',orientation:'portrait'},
+  pagebreak:{mode:['avoid-all','css']}
+};
 
-  else if(section==='tarot'){
-    document.getElementById('tarot-question').value='';
-    document.getElementById('spread-select').selectedIndex=0;
-    document.getElementById('rev-mode').checked=false;
-    selectedCards={};
-    document.querySelectorAll('.chip').forEach(c=>c.className='chip');
-    updateSpread();
-    resetResult('tarot-result','tarot-pdf-row');
-    savedTarot='';savedTarotMeta={};
-  }
+async function renderAndDownload(htmlContent, filename){
+  const el = document.createElement('div');
+  el.innerHTML = htmlContent;
+  el.style.cssText = 'position:fixed;left:-9999px;top:0;width:750px;background:#fff;';
+  document.body.appendChild(el);
+  const opts = Object.assign({}, PDF_OPTS, {filename});
+  await html2pdf().set(opts).from(el).save();
+  document.body.removeChild(el);
+}
 
-  else if(section==='num'){
-    // wyczyść aktywną zakładkę
-    const active=document.querySelector('.inner-panel.active');
-    if(!active) return;
-    active.querySelectorAll('input[type="text"],input[type="date"],textarea').forEach(el=>el.value='');
-    active.querySelectorAll('select').forEach(el=>el.selectedIndex=0);
-    if(active.id==='num-person'){resetResult('np-result','np-pdf-row');savedNumPerson='';savedNpMeta={};}
-    else if(active.id==='num-relation'){resetResult('nr-result','nr-pdf-row');savedNumRelation='';savedNrMeta={};}
-    else if(active.id==='num-business'){resetResult('nb-result','nb-pdf-row');savedNumBusiness='';savedNbMeta={};}
-  }
+async function downloadPDF(type){
+  const today = new Date().toLocaleDateString('pl-PL',{day:'2-digit',month:'long',year:'numeric'});
 
-  else if(section==='synth'){
-    resetResult('synth-result',null);
-    document.getElementById('synth-pdf-row').style.display='none';
-    savedSynth='';
+  if(type==='astro'){
+    const m=savedAstroMeta;
+    const meta=[
+      m.name?'Imię: '+m.name:'',
+      'Data: '+m.birthdate+(m.birthtime?' · Godzina: '+m.birthtime:''),
+      'Miejsce: '+m.birthplace+' · Płeć: '+m.gender,
+      'Obszar: '+m.focus
+    ].filter(Boolean);
+    await renderAndDownload(buildPDFHTML('Analiza Astrologiczna','Raport osobisty',meta,savedAstro),'astrum-astrologia.pdf');
   }
+  else if(type==='tarot'){
+    const m=savedTarotMeta;
+    const meta=[
+      'Układ: '+m.spreadName,
+      m.question?'Pytanie: '+m.question:'',
+      'Karty: '+m.cards.map(c=>c.pos+': '+c.name+(c.rev?' (odwr.)':'')).join(' · ')
+    ].filter(Boolean);
+    await renderAndDownload(buildPDFHTML('Odczyt Tarota','Interpretacja układu kart',meta,savedTarot),'astrum-tarot.pdf');
+  }
+  else if(type==='num-person'){
+    const m=savedNpMeta;
+    await renderAndDownload(buildPDFHTML('Numerologia — Osoba','Pełna analiza numerologiczna',['Imię: '+m.fullname,'Data: '+m.birthdate,'Obszar: '+m.focus],savedNumPerson),'astrum-numerologia-osoba.pdf');
+  }
+  else if(type==='num-relation'){
+    const m=savedNrMeta;
+    await renderAndDownload(buildPDFHTML('Numerologia — Relacja','Analiza kompatybilności',['Osoba 1: '+m.name1+' (ur. '+m.birth1+')','Osoba 2: '+m.name2+' (ur. '+m.birth2+')','Charakter: '+m.rtype],savedNumRelation),'astrum-numerologia-relacja.pdf');
+  }
+  else if(type==='num-business'){
+    const m=savedNbMeta;
+    const meta=['Firma: '+m.name];
+    if(m.date) meta.push('Data: '+m.date);
+    if(m.industry) meta.push('Branża: '+m.industry);
+    meta.push('Obszar: '+m.focus);
+    await renderAndDownload(buildPDFHTML('Numerologia — Firma','Analiza biznesowa',meta,savedNumBusiness),'astrum-numerologia-firma.pdf');
+  }
+  else if(type==='synth'){
+    await renderAndDownload(buildPDFHTML('Synteza','Połączenie wszystkich analiz',[],savedSynth),'astrum-synteza.pdf');
+  }
+  else if(type==='full'){
+    const parts=[];
+    if(savedAstro) parts.push('Astrologia');
+    if(savedTarot) parts.push('Tarot');
+    if(savedNumPerson) parts.push('Numerologia Osoby');
+    if(savedNumRelation) parts.push('Numerologia Relacji');
+    if(savedNumBusiness) parts.push('Numerologia Firmy');
+    if(savedSynth) parts.push('Synteza');
 
-  checkUnlock();
-  updateSynthStatus();
+    let fullHTML = buildCoverHTML(parts) + '<div style="page-break-after:always;"></div>';
+
+    const m=savedAstroMeta;
+    if(savedAstro){
+      const meta=[m.name?'Imię: '+m.name:'','Data: '+m.birthdate+(m.birthtime?' · '+m.birthtime:''),'Miejsce: '+m.birthplace].filter(Boolean);
+      fullHTML += buildPDFHTML('Analiza Astrologiczna','Część I',meta,savedAstro)+'<div style="page-break-after:always;"></div>';
+    }
+    if(savedTarot){
+      const mt=savedTarotMeta;
+      const meta=['Układ: '+mt.spreadName,mt.question?'Pytanie: '+mt.question:'','Karty: '+mt.cards.map(c=>c.pos+': '+c.name+(c.rev?' ↓':'')).join(', ')].filter(Boolean);
+      fullHTML += buildPDFHTML('Odczyt Tarota','Część II',meta,savedTarot)+'<div style="page-break-after:always;"></div>';
+    }
+    if(savedNumPerson){
+      const mn=savedNpMeta;
+      fullHTML += buildPDFHTML('Numerologia Osoby','Część III',['Imię: '+mn.fullname,'Data: '+mn.birthdate],savedNumPerson)+'<div style="page-break-after:always;"></div>';
+    }
+    if(savedNumRelation){
+      const mr=savedNrMeta;
+      fullHTML += buildPDFHTML('Numerologia Relacji','Część IV',['Osoba 1: '+mr.name1,'Osoba 2: '+mr.name2],savedNumRelation)+'<div style="page-break-after:always;"></div>';
+    }
+    if(savedNumBusiness){
+      const mb=savedNbMeta;
+      fullHTML += buildPDFHTML('Numerologia Firmy','Część V',['Firma: '+mb.name],savedNumBusiness)+'<div style="page-break-after:always;"></div>';
+    }
+    if(savedSynth){
+      fullHTML += buildPDFHTML('Synteza','Połączenie analiz',[],savedSynth);
+    }
+    await renderAndDownload(fullHTML,'astrum-pelny-raport.pdf');
+  }
 }
 
 updateSynthStatus();
