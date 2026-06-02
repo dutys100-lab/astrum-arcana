@@ -536,6 +536,93 @@ Minimum 800 słów. Żadnych gwiazdek, hashtagów ani numerów.`;
 }
 
 // ── NUMEROLOGIA ──
+
+// ── NUMEROLOGIA — OBLICZENIA ──
+function reduceNum(n, keepMaster=true){
+  // Redukuj do cyfry, zachowując liczby mistrzowskie 11, 22, 33
+  while(n > 9){
+    if(keepMaster && (n===11||n===22||n===33)) break;
+    n = String(n).split('').reduce((a,d)=>a+parseInt(d),0);
+  }
+  return n;
+}
+
+function sumDigits(str){
+  // Suma wszystkich cyfr w stringu (ignoruje nie-cyfry)
+  return str.replace(/\D/g,'').split('').reduce((a,d)=>a+parseInt(d),0);
+}
+
+function calcLifeNumber(dateStr){
+  // dateStr format: YYYY-MM-DD
+  const digits = dateStr.replace(/\D/g,''); // np. 19781102
+  const sum = digits.split('').reduce((a,d)=>a+parseInt(d),0);
+  return reduceNum(sum);
+}
+
+function calcDestinyNumber(fullName){
+  // Metoda pitagorejska: A=1,B=2,...,Z=8 (uproszczona)
+  const map = {a:1,b:2,c:3,d:4,e:5,f:6,g:7,h:8,i:9,j:1,k:2,l:3,m:4,n:5,o:6,p:7,q:8,r:9,s:1,t:2,u:3,v:4,w:5,x:6,y:7,z:8,
+    ą:1,ć:3,ę:5,ł:3,ń:5,ó:6,ś:1,ź:8,ż:8};
+  const sum = fullName.toLowerCase().replace(/\s/g,'').split('').reduce((a,c)=>a+(map[c]||0),0);
+  return reduceNum(sum);
+}
+
+function calcSoulNumber(fullName){
+  // Tylko samogłoski
+  const vowels = 'aeiouąęóy';
+  const map = {a:1,e:5,i:9,o:6,u:3,ą:1,ę:5,ó:6,y:7};
+  const sum = fullName.toLowerCase().split('').filter(c=>vowels.includes(c)).reduce((a,c)=>a+(map[c]||0),0);
+  return reduceNum(sum);
+}
+
+function calcPersonalityNumber(fullName){
+  // Tylko spółgłoski
+  const vowels = 'aeiouąęóy ';
+  const map = {b:2,c:3,d:4,f:6,g:7,h:8,j:1,k:2,l:3,m:4,n:5,p:7,q:8,r:9,s:1,t:2,v:4,w:5,x:6,z:8,ć:3,ł:3,ń:5,ś:1,ź:8,ż:8};
+  const sum = fullName.toLowerCase().split('').filter(c=>!vowels.includes(c)).reduce((a,c)=>a+(map[c]||0),0);
+  return reduceNum(sum);
+}
+
+function calcBirthdayNumber(dateStr){
+  // Sam dzień urodzenia
+  const day = parseInt(dateStr.split('-')[2]);
+  return reduceNum(day);
+}
+
+function calcPersonalYear(dateStr, year){
+  // Miesiąc i dzień urodzenia + aktualny rok
+  const parts = dateStr.split('-');
+  const month = parseInt(parts[1]);
+  const day = parseInt(parts[2]);
+  const sum = sumDigits(String(day)) + sumDigits(String(month)) + sumDigits(String(year));
+  return reduceNum(sum);
+}
+
+function masterLabel(n){
+  return (n===11||n===22||n===33) ? n+'/'+reduceNum(n,false)+' (liczba mistrzowska)' : String(n);
+}
+
+function calcAllNumbers(fullName, dateStr){
+  const year = new Date().getFullYear();
+  const life = calcLifeNumber(dateStr);
+  const destiny = calcDestinyNumber(fullName);
+  const soul = calcSoulNumber(fullName);
+  const personality = calcPersonalityNumber(fullName);
+  const birthday = calcBirthdayNumber(dateStr);
+  const personalYear = calcPersonalYear(dateStr, year);
+  return {
+    life, destiny, soul, personality, birthday, personalYear,
+    labels: {
+      life: masterLabel(life),
+      destiny: masterLabel(destiny),
+      soul: masterLabel(soul),
+      personality: masterLabel(personality),
+      birthday: masterLabel(birthday),
+      personalYear: masterLabel(personalYear)
+    }
+  };
+}
+
 async function analyzeNum(type){
   let prompt='',resultEl,btnEl,pdfRowEl;
 
@@ -544,32 +631,24 @@ async function analyzeNum(type){
     if(!fn||!bd){alert('Podaj imię, nazwisko i datę urodzenia.');return;}
     const focus=document.getElementById('np-focus').value,extra=document.getElementById('np-extra').value;
     savedNpMeta={fullname:fn,birthdate:bd,focus};
-    prompt=`Jesteś doświadczoną numerolożką i przewodniczką duchową. Piszesz zawsze piękną, płynną polszczyzną — jak mądra przyjaciółka pisząca list do bliskiej osoby. Nigdy nie używasz gwiazdek, hashtagów ani numerowanych list — tylko płynna proza w akapitach. Piszesz ZAWSZE w drugiej osobie — używając "Ty", "Twój", "Jesteś" — nigdy w trzeciej osobie. Imienia osoby NIE używaj wcale lub użyj go TYLKO raz na początku. Potem pisz płynnie bez powtarzania imienia. Przy każdej liczbie numerologicznej podaj jej wartość CYFRAMI (np. "Twoja Liczba Życia to 7", "Liczba Przeznaczenia wynosi 11"). Daty zawsze zapisuj cyframi (np. 2.11.1978), nigdy słownie. Liczby obliczeniowe zawsze cyframi.
+    // Oblicz liczby w JS — bezbłędnie
+    const nums=calcAllNumbers(fn,bd);
+    prompt=`Jesteś doświadczoną numerolożką i poetką duszy. Piszesz zawsze piękną, płynną polszczyzną — jak mądra przyjaciółka pisząca list. Piszesz w drugiej osobie (Ty, Twój, Jesteś). Imię użyj tylko raz na początku jako ciepłe powitanie. Nigdy nie używasz gwiazdek, hashtagów ani list numerowanych.
 
 Osoba: ${fn}, urodzona ${bd}.
 Obszar zainteresowania: ${focus}.${extra?'\nPytanie: '+extra:''}
 
-Oblicz wszystkie liczby i napisz głęboką, poetycką analizę numerologiczną w pięknej polskiej prozie.
+Liczby zostały już obliczone — NIE przeliczaj ich, użyj dokładnie tych wartości:
+• Liczba Życia: ${nums.labels.life}
+• Liczba Przeznaczenia: ${nums.labels.destiny}
+• Liczba Duszy: ${nums.labels.soul}
+• Liczba Osobowości: ${nums.labels.personality}
+• Liczba Urodzin: ${nums.labels.birthday}
+• Rok Osobisty ${new Date().getFullYear()}: ${nums.labels.personalYear}
 
-Liczba Życia — oblicz z daty urodzenia i opisz główną ścieżkę życiową tej osoby, jej misję, to co ją napędza i w czym jest naturalna. Minimum 5 zdań.
+Napisz głęboką, poetycką analizę numerologiczną w pięknej polskiej prozie. Dla każdej liczby napisz jej wartość na początku akapitu, potem rozwiń znaczenie. Każda liczba minimum 4 zdania.
 
-Liczba Przeznaczenia — oblicz z pełnego imienia i nazwiska metodą pitagorejską i opisz cel duszy, powołanie, kierunek w jakim zmierza życie. Minimum 5 zdań.
-
-Liczba Duszy — oblicz z samogłosek i opisz ukryte pragnienia serca, to czego dusza naprawdę szuka i co ją karmi. Minimum 4 zdania.
-
-Liczba Osobowości — oblicz ze spółgłosek i opisz jak ta osoba jest postrzegana przez innych, jaka maska wituje świat. Minimum 4 zdania.
-
-Liczba Urodzin — sam dzień urodzenia jako ukryty talent i dar. Minimum 3 zdania.
-
-Rok Osobisty ${new Date().getFullYear()} — oblicz i opisz w jakiej energii rocznej jest teraz ta osoba, co ten rok przynosi, czego wymaga i jak go najlepiej wykorzystać. Minimum 4 zdania.
-
-Aktywny Cykl Życiowy — opisz w jakiej większej fazie życiowej jest ta osoba i co to oznacza dla jej decyzji. Minimum 3 zdania.
-
-${focus !== 'Pełna analiza' ? 'Skupienie na obszarze — '+focus+': napisz osobny, rozbudowany akapit o tym obszarze w kontekście liczb tej osoby. Minimum 5 zdań.' : ''}
-
-Zakończ jednym pięknym zdaniem-mantrą dla tej duszy.
-
-Minimum 800 słów. Żadnych gwiazdek, hashtagów ani numerów.`;
+Na końcu jedno piękne zdanie-mantra. Minimum 700 słów.`;
     resultEl=document.getElementById('np-result');btnEl=document.getElementById('np-btn');pdfRowEl=document.getElementById('np-pdf-row');
   }
 
@@ -579,20 +658,28 @@ Minimum 800 słów. Żadnych gwiazdek, hashtagów ani numerów.`;
     if(!n1||!b1||!n2||!b2){alert('Podaj dane obu osób.');return;}
     const rtype=document.getElementById('nr-type').value,extra=document.getElementById('nr-extra').value;
     savedNrMeta={name1:n1,birth1:b1,name2:n2,birth2:b2,rtype};
-    prompt=`Jesteś ekspertką numerologii. Piszesz zawsze po polsku. Wykonaj analizę kompatybilności numerologicznej.
+    // Oblicz liczby obu osób
+    const nums1=calcAllNumbers(n1,b1);
+    const nums2=calcAllNumbers(n2,b2);
+    prompt=`Jesteś doświadczoną numerolożką i poetką duszy. Piszesz zawsze piękną, płynną polszczyzną — jak mądra przyjaciółka. Piszesz w drugiej osobie (Ty, Twój). Nigdy nie używasz gwiazdek, hashtagów ani list.
+
+Analiza kompatybilności dla:
 Osoba 1: ${n1}, ur. ${b1}
 Osoba 2: ${n2}, ur. ${b2}
 Charakter relacji: ${rtype}${extra?'\nPytanie: '+extra:''}
-Oblicz i opisz:
-1. Liczba Życia obu osób i co ta para oznacza razem
-2. Kompatybilność podstawowych liczb (Życia, Przeznaczenia)
-3. Dynamika relacji — mocne strony współpracy/związku
-4. Główne wyzwania i obszary napięć
-5. Czego mogą się od siebie nauczyć
-6. Energia roku ${new Date().getFullYear()} dla tej relacji
-7. Ogólna ocena kompatybilności i rada
-8. Zdanie-esencja dla tej pary
-Pisz ciepło, głęboko i rozbudowanie. Każdy punkt opisz szczegółowo — minimum 3-4 zdania. Nie stosuj gwiazdek ani markdown. Pisz płynną prozą. Minimum 700 słów.`;
+
+Liczby zostały już obliczone — użyj DOKŁADNIE tych wartości:
+${n1}:
+• Liczba Życia: ${nums1.labels.life}
+• Liczba Przeznaczenia: ${nums1.labels.destiny}
+• Liczba Duszy: ${nums1.labels.soul}
+
+${n2}:
+• Liczba Życia: ${nums2.labels.life}
+• Liczba Przeznaczenia: ${nums2.labels.destiny}
+• Liczba Duszy: ${nums2.labels.soul}
+
+Napisz głęboką, poetycką analizę kompatybilności w pięknej prozie. Opisz co oznacza połączenie tych liczb dla tej relacji. Każdy wątek minimum 4 zdania. Na końcu zdanie-esencja dla tej pary. Minimum 600 słów.`;
     resultEl=document.getElementById('nr-result');btnEl=document.getElementById('nr-btn');pdfRowEl=document.getElementById('nr-pdf-row');
   }
 
