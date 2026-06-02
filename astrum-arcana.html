@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Astrum & Arcana</title>
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600&family=EB+Garamond:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
@@ -439,20 +439,20 @@ function updateSynthStatus(){
 }
 
 // ── API ──
-const GROQ_KEY='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';
+const GEMINI_KEY='AQ.Ab8RN6IFdCnsNivZk8P13IjF9ymHtHLpz_UYkyUNUZzNnRn3fA';
 async function callClaude(prompt,resultEl){
   resultEl.style.display='block';resultEl.className='result-box visible loading';
   resultEl.textContent='✦ Odczytuję energie… proszę czekać…';
   try{
-    const resp=await fetch('https://api.groq.com/openai/v1/chat/completions',{
+    const resp=await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key='+GEMINI_KEY,{
       method:'POST',
-      headers:{'Content-Type':'application/json','Authorization':'Bearer '+GROQ_KEY},
-      body:JSON.stringify({model:'llama-3.3-70b-versatile',messages:[{role:'user',content:prompt}],max_tokens:3000,temperature:0.85})
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({contents:[{parts:[{text:prompt}]}],generationConfig:{maxOutputTokens:3000,temperature:0.85}})
     });
     const data=await resp.json();
     if(data.error){resultEl.className='result-box visible';resultEl.textContent='Błąd API: '+data.error.message;return '';}
     resultEl.className='result-box visible';
-    const text=data.choices?.[0]?.message?.content||'Przepraszam, wystąpił błąd. Spróbuj ponownie.';
+    const text=data.candidates?.[0]?.content?.parts?.[0]?.text||'Przepraszam, wystąpił błąd. Spróbuj ponownie.';
     resultEl.textContent=text;return text;
   } catch(e){
     resultEl.className='result-box visible';
@@ -469,9 +469,32 @@ async function analyzeAstro(){
     mood=document.getElementById('mood').value,extra=document.getElementById('extra').value;
   const btn=document.getElementById('astro-btn');btn.disabled=true;
   savedAstroMeta={name,gender,birthdate:bd,birthtime:bt,birthplace:bp,focus,mood};
-  const prompt=`Jesteś doświadczoną astrologką. Piszesz zawsze po polsku. Stwórz głęboką, ciepłą analizę astrologiczną.
-Dane: Imię: ${name||'(nie podano)'}, Płeć: ${gender}, Data: ${bd}, Godzina: ${bt||'nieznana'}, Miejsce: ${bp}, Obszar: ${focus}${mood?', Nastrój: '+mood:''}${extra?'\nPytanie: '+extra:''}
-Opisz: 1.Znak Słońca 2.Znak Księżyca 3.Ascendent 4.Dominujące planety 5.Mocne strony 6.Obszary do pracy 7.Energia aktualnego okresu 8.Skupienie na obszarze zainteresowania 9.Zdanie-esencja. Pisz ciepło, głęboko i rozbudowanie. Każdy punkt opisz szczegółowo — minimum 3-4 zdania. Nie stosuj gwiazdek ani markdown. Pisz płynną prozą. Minimum 700 słów.`;
+  const prompt=`Jesteś doświadczoną astrologką i poetką duszy. Piszesz zawsze piękną, płynną polszczyzną — jak mądra przyjaciółka pisząca list do bliskiej osoby. Twoje analizy są ciepłe, głębokie, pełne obrazowych metafor. Nigdy nie używasz gwiazdek, hashtagów ani numerowanych list — tylko płynna proza w akapitach.
+
+Osoba: ${name||'(nie podano)'}, ${gender}, urodzona ${bd}${bt?' o godzinie '+bt:''} w ${bp}.
+Obszar zainteresowania: ${focus}.${mood?'\nAktualny nastrój: '+mood:''}${extra?'\nPytanie: '+extra:''}
+
+Napisz głęboką, poetycką analizę astrologiczną. Każdą część zaczynaj naturalnym, ciepłym nagłówkiem bez gwiazdek i numerów.
+
+Znak Słońca — kim jesteś w swojej istocie, jaka jest Twoja misja życiowa i co Cię napędza. Co oznacza ten znak właśnie dla tej osoby — konkretnie i obrazowo. Minimum 5 zdań.
+
+Znak Księżyca — Twój świat emocjonalny, czego potrzebujesz by czuć się bezpiecznie i jak działa Twoja intuicja. Minimum 5 zdań.
+
+Ascendent — ${bt?'oblicz na podstawie godziny i miejsca urodzenia i opisz jak ta osoba jest postrzegana przez świat, jaka energia ją poprzedza':'opisz czym jest ascendent i dlaczego godzina urodzenia jest kluczem — co można odczytać bez niej'}. Minimum 4 zdania.
+
+Taniec planet — które planety dominują w tej mapie nieba i jak kształtują osobowość, relacje i życiowe wybory. Minimum 4 zdania.
+
+Dary i mocne strony — co wyjątkowego niesie ta konfiguracja, jakie talenty i zasoby ma ta osoba. Minimum 4 zdania.
+
+Przestrzenie wzrostu — z czułością i bez oceniania opisz obszary gdzie dusza ma jeszcze do nauczenia lub uzdrowienia. Minimum 4 zdania.
+
+Energia tego czasu — co mówią gwiazdy o tym konkretnym momencie życiowym, jaki wiatr wieje w żagle lub stawia opór. Minimum 4 zdania.
+
+${focus !== 'Pełna analiza' ? 'Skupienie na obszarze — '+focus+': poświęć temu osobny, rozbudowany akapit pełen konkretnych obserwacji i rady. Minimum 5 zdań.' : ''}
+
+Na końcu jedno piękne zdanie-mantra dla tej duszy — krótkie, mocne, zapamiętane na długo.
+
+Minimum 800 słów. Żadnych gwiazdek, gwiazdek markdown, hashtagów ani numerów.\`
   const result=await callClaude(prompt,document.getElementById('astro-result'));
   if(result){savedAstro=result;document.getElementById('astro-pdf-row').style.display='flex';checkUnlock();}
   btn.disabled=false;
@@ -487,7 +510,26 @@ async function interpretTarot(){
   const cardsDesc=names.map((n,i)=>`- ${spread.positions[i]||'Pozycja '+(i+1)}: ${n}${selectedCards[n]?' (ODWROCONA)':''}`).join('\n');
   savedTarotMeta={spreadName,question,cards:names.map((n,i)=>({pos:spread.positions[i]||'',name:n,rev:selectedCards[n]}))};
   const btn=document.getElementById('tarot-btn');btn.disabled=true;
-  const prompt=`Jesteś doświadczoną tarocistrką. Piszesz zawsze po polsku.\nUkład: ${spreadName}${question?'\nPytanie: '+question:''}\nKarty:\n${cardsDesc}\nStruktura: 1.Ogólna energia 2.Interpretacja każdej karty 3.Połączenia między kartami 4.Przesłanie i rada 5.Zdanie-esencja. ~500 słów.`;
+  const prompt=`Jesteś doświadczoną tarocistrką i przewodniczką duchową. Piszesz zawsze piękną, płynną polszczyzną — jak mądra przyjaciółka rozmawiająca przy herbacie. Twoje interpretacje są ciepłe, głębokie, pełne mądrości i obrazowych metafor. Nigdy nie używasz gwiazdek, hashtagów ani numerowanych list — tylko płynna proza w akapitach.
+
+Układ: ${spreadName}
+${question?'Pytanie / intencja: '+question:''}
+Karty:
+${cardsDesc}
+
+Napisz głęboką, poetycką interpretację tego układu w pięknej polskiej prozie.
+
+Zacznij od akapitu o ogólnej energii całego układu — jaka atmosfera unosi się nad tymi kartami, jaki temat życiowy wyłania się z całości, co układ mówi pierwszym tchem. Minimum 4 zdania.
+
+Następnie opisz każdą kartę osobno — naturalnym nagłówkiem (bez gwiazdek, bez numerów) napisz jej nazwę i pozycję, potem rozwiń znaczenie: co ta karta mówi właśnie w tym miejscu układu, jaką energię wnosi, co radzi lub ostrzega. Jeśli karta jest odwrócona, opisz jak zmienia to jej przekaz. Każda karta minimum 4 zdania.
+
+Napisz akapit o połączeniach między kartami — które rozmawiają ze sobą, wzmacniają się lub tworzą napięcie, jaką historię razem opowiadają. Minimum 4 zdania.
+
+Zakończ głównym przesłaniem i konkretną, ciepłą radą — co ta osoba powinna zabrać z tego odczytu do swojego życia, co zrobić. Minimum 4 zdania.
+
+Na samym końcu jedno krótkie zdanie-esencja całego przekazu.
+
+Minimum 800 słów. Żadnych gwiazdek, hashtagów ani numerów.\`
   const result=await callClaude(prompt,document.getElementById('tarot-result'));
   if(result){savedTarot=result;document.getElementById('tarot-pdf-row').style.display='flex';checkUnlock();}
   btn.disabled=false;
@@ -502,19 +544,32 @@ async function analyzeNum(type){
     if(!fn||!bd){alert('Podaj imię, nazwisko i datę urodzenia.');return;}
     const focus=document.getElementById('np-focus').value,extra=document.getElementById('np-extra').value;
     savedNpMeta={fullname:fn,birthdate:bd,focus};
-    prompt=`Jesteś ekspertką numerologii. Piszesz zawsze po polsku. Wykonaj pełną analizę numerologiczną.
-Dane: Imię i nazwisko: ${fn}, Data urodzenia: ${bd}, Obszar: ${focus}${extra?'\nPytanie: '+extra:''}
-Oblicz i opisz:
-1. Liczba Życia (z daty urodzenia) — główna ścieżka życiowa
-2. Liczba Przeznaczenia (z pełnego imienia i nazwiska wg Pytag.) — cel duszy
-3. Liczba Duszy (z samogłosek) — ukryte pragnienia serca
-4. Liczba Osobowości (ze spółgłosek) — jak Cię postrzegają inni
-5. Liczba Urodzin (sam dzień urodzenia) — ukryty talent
-6. Rok Osobisty ${new Date().getFullYear()} — aktualna energia roczna
-7. Aktywny Cykl Życiowy — w jakiej fazie jesteś
-8. Skupienie na wybranym obszarze zainteresowania
-9. Zdanie-mantra dla tej osoby
-Przy każdej liczbie napisz jej wartość. Pisz ciepło, głęboko i rozbudowanie. Każdy punkt opisz szczegółowo — minimum 3-4 zdania. Nie stosuj gwiazdek ani markdown. Pisz płynną prozą. Minimum 700 słów.`;
+    prompt=`Jesteś doświadczoną numerolożką i przewodniczką duchową. Piszesz zawsze piękną, płynną polszczyzną — jak mądra przyjaciółka pisząca list do bliskiej osoby. Nigdy nie używasz gwiazdek, hashtagów ani numerowanych list — tylko płynna proza w akapitach. Przy każdej liczbie podaj jej wartość naturalnie w tekście.
+
+Osoba: ${fn}, urodzona ${bd}.
+Obszar zainteresowania: ${focus}.${extra?'\nPytanie: '+extra:''}
+
+Oblicz wszystkie liczby i napisz głęboką, poetycką analizę numerologiczną w pięknej polskiej prozie.
+
+Liczba Życia — oblicz z daty urodzenia i opisz główną ścieżkę życiową tej osoby, jej misję, to co ją napędza i w czym jest naturalna. Minimum 5 zdań.
+
+Liczba Przeznaczenia — oblicz z pełnego imienia i nazwiska metodą pitagorejską i opisz cel duszy, powołanie, kierunek w jakim zmierza życie. Minimum 5 zdań.
+
+Liczba Duszy — oblicz z samogłosek i opisz ukryte pragnienia serca, to czego dusza naprawdę szuka i co ją karmi. Minimum 4 zdania.
+
+Liczba Osobowości — oblicz ze spółgłosek i opisz jak ta osoba jest postrzegana przez innych, jaka maska wituje świat. Minimum 4 zdania.
+
+Liczba Urodzin — sam dzień urodzenia jako ukryty talent i dar. Minimum 3 zdania.
+
+Rok Osobisty ${new Date().getFullYear()} — oblicz i opisz w jakiej energii rocznej jest teraz ta osoba, co ten rok przynosi, czego wymaga i jak go najlepiej wykorzystać. Minimum 4 zdania.
+
+Aktywny Cykl Życiowy — opisz w jakiej większej fazie życiowej jest ta osoba i co to oznacza dla jej decyzji. Minimum 3 zdania.
+
+${focus !== 'Pełna analiza' ? 'Skupienie na obszarze — '+focus+': napisz osobny, rozbudowany akapit o tym obszarze w kontekście liczb tej osoby. Minimum 5 zdań.' : ''}
+
+Zakończ jednym pięknym zdaniem-mantrą dla tej duszy.
+
+Minimum 800 słów. Żadnych gwiazdek, hashtagów ani numerów.\`
     resultEl=document.getElementById('np-result');btnEl=document.getElementById('np-btn');pdfRowEl=document.getElementById('np-pdf-row');
   }
 
@@ -611,108 +666,120 @@ async function runSynthesis(){
   if(!parts.length){alert('Zaznacz co najmniej jedną analizę.');return;}
   const btn=document.getElementById('synth-btn');btn.disabled=true;
   const joined=parts.join('\n\n---\n\n');
-  const prompt='Jesteś mądrą przewodniczką duchową. Piszesz zawsze po polsku.\nMasz do dyspozycji następujące analizy:\n\n'+joined+'\n\n---\nStwórz SYNTEZĘ — jedną spójną, głęboką interpretację, która:\n1. Znajdzie wspólne motywy i wzajemne wzmocnienia między dostarczonymi analizami\n2. Wskaże gdzie różne systemy mówią to samo\n3. Opisze główny temat życiowy tej osoby w tym momencie\n4. Poda konkretną, praktyczną radę\n5. Zakończy jednym zdaniem-mantrą\n\nPisz jak list do bliskiej przyjaciółki. Ciepło, konkretnie. ~400 słów.';
+  const prompt='Jesteś mądrą przewodniczką duchową, astrologką i tarocistrką — piszesz zawsze piękną, płynną polszczyzną jak poetka i mądra przyjaciółka jednocześnie. Nigdy nie używasz gwiazdek, hashtagów ani list numerowanych.\n\nMasz do dyspozycji następujące analizy:\n\n'+joined+'\n\n---\n\nNapisz głęboką SYNTEZĘ w pięknej polskiej prozie — jeden spójny, poetycki tekst który:\n\nZaczyna się od akapitu o dominującej energii i głównym temacie który wyłania się ze wszystkich analiz — co gwiazdy, karty i liczby mówią jednym głosem. Minimum 5 zdań.\n\nNastępnie opisuje wzajemne wzmocnienia i połączenia między systemami — gdzie astrologia, tarot i numerologia pokazują to samo innymi słowami. Co to powtórzenie oznacza dla tej osoby. Minimum 5 zdań.\n\nPotem opisuje główne wyzwanie lub lekcję którą ta osoba niesie w tym momencie życia — z czułością i bez oceniania. Minimum 4 zdania.\n\nNastępnie daje konkretną, ciepłą i praktyczną radę — co ta osoba może zrobić już teraz, w tym tygodniu, żeby działać zgodnie z energią którą pokazują wszystkie analizy. Minimum 4 zdania.\n\nZakończ jednym pięknym, zapamiętanym na długo zdaniem-mantrą dla tej duszy.\n\nMinimum 600 słów. Żadnych gwiazdek, hashtagów ani numerów.';
   const result=await callClaude(prompt,document.getElementById('synth-result'));
   if(result){savedSynth=result;document.getElementById('synth-pdf-row').style.display='block';}
   btn.disabled=false;
 }
 
 // ── PDF ──
-function buildPDFHTML(title, subtitle, metaLines, bodyText){
-  const metaRows = metaLines.map(l=>`<tr><td style="padding:3px 8px;font-size:13px;color:#5a4a32;">${l}</td></tr>`).join('');
+function buildPrintHTML(title, subtitle, metaLines, bodyText){
   const today = new Date().toLocaleDateString('pl-PL',{day:'2-digit',month:'long',year:'numeric'});
-  return `
-  <div style="font-family:Georgia,serif;color:#2a2018;padding:20px 30px;max-width:700px;margin:0 auto;">
-    <div style="background:#faf6ef;padding:12px 20px;border-bottom:2px solid #b8902a;margin-bottom:20px;display:flex;justify-content:space-between;align-items:center;">
-      <span style="font-family:Georgia,serif;font-size:13px;color:#8a7a62;">Astrum &amp; Arcana</span>
-      <span style="font-family:Georgia,serif;font-size:13px;color:#8a7a62;">${today}</span>
-    </div>
-    <h1 style="font-family:Georgia,serif;font-size:26px;font-weight:normal;text-align:center;color:#2a2018;margin:0 0 6px;">${title}</h1>
-    <p style="text-align:center;font-style:italic;color:#8a7a62;font-size:14px;margin:0 0 20px;">${subtitle}</p>
-    <table style="width:100%;border:1px solid #e8d5a0;background:#fdf9f2;border-radius:4px;margin-bottom:24px;border-collapse:collapse;">
-      ${metaRows}
-    </table>
-    <div style="font-size:15px;line-height:1.9;color:#2a2018;white-space:pre-wrap;">${bodyText.replace(/\*\*/g,'').replace(/\*/g,'')}</div>
-    <div style="margin-top:40px;padding-top:12px;border-top:1px solid #e8d5a0;font-size:11px;color:#8a7a62;text-align:center;">
-      Astrum &amp; Arcana &nbsp;·&nbsp; ${today}
-    </div>
-  </div>`;
+  const metaRows = metaLines.filter(Boolean).map(l=>`<div class="meta-row">${l}</div>`).join('');
+  const cleaned = bodyText.replace(/\*\*/g,'').replace(/\*/g,'').replace(/#{1,3} /g,'');
+  return `<!DOCTYPE html><html lang="pl"><head><meta charset="UTF-8">
+  <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;1,400&family=Cinzel:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:'EB Garamond',Georgia,serif;color:#2a2018;background:#fff;padding:0;}
+    .page{max-width:720px;margin:0 auto;padding:40px 50px;}
+    .header{display:flex;justify-content:space-between;align-items:center;padding-bottom:12px;border-bottom:2px solid #b8902a;margin-bottom:28px;}
+    .header-brand{font-family:'Cinzel',serif;font-size:13px;color:#8a7a62;letter-spacing:0.1em;}
+    .header-date{font-size:12px;color:#8a7a62;}
+    h1{font-family:'Cinzel',serif;font-size:28px;font-weight:400;text-align:center;color:#2a2018;margin-bottom:6px;letter-spacing:0.05em;}
+    .subtitle{text-align:center;font-style:italic;color:#8a7a62;font-size:15px;margin-bottom:28px;}
+    .meta-box{background:#fdf9f2;border:1px solid #e8d5a0;border-radius:4px;padding:14px 18px;margin-bottom:28px;}
+    .meta-row{font-size:14px;color:#5a4a32;padding:3px 0;line-height:1.5;}
+    .body-text{font-size:16px;line-height:1.9;color:#2a2018;white-space:pre-wrap;}
+    .footer{margin-top:40px;padding-top:14px;border-top:1px solid #e8d5a0;text-align:center;font-size:11px;color:#8a7a62;font-family:'Cinzel',serif;letter-spacing:0.08em;}
+    @media print{
+      body{padding:0;}
+      .page{padding:20px 30px;}
+      .no-print{display:none!important;}
+      @page{margin:15mm 15mm;}
+    }
+  </style></head><body>
+  <div class="page">
+    <div class="header"><span class="header-brand">Astrum &amp; Arcana</span><span class="header-date">${today}</span></div>
+    <h1>${title}</h1>
+    <div class="subtitle">${subtitle}</div>
+    ${metaRows?`<div class="meta-box">${metaRows}</div>`:''}
+    <div class="body-text">${cleaned}</div>
+    <div class="footer">Astrum &amp; Arcana &nbsp;·&nbsp; ${today}</div>
+  </div>
+  <div class="no-print" style="position:fixed;bottom:20px;right:20px;">
+    <button onclick="window.print()" style="font-family:'Cinzel',serif;font-size:13px;background:#b8902a;color:#fff;border:none;padding:10px 22px;border-radius:4px;cursor:pointer;letter-spacing:0.1em;">Drukuj / Zapisz PDF</button>
+    <button onclick="window.close()" style="font-family:'Cinzel',serif;font-size:13px;background:transparent;color:#8a7a62;border:1px solid #e8d5a0;padding:10px 16px;border-radius:4px;cursor:pointer;margin-left:8px;">Zamknij</button>
+  </div>
+  </body></html>`;
 }
 
-function buildCoverHTML(parts){
+function buildCoverPrint(parts){
   const today = new Date().toLocaleDateString('pl-PL',{day:'2-digit',month:'long',year:'numeric'});
   const m = savedAstroMeta;
-  return `
-  <div style="font-family:Georgia,serif;color:#2a2018;min-height:1050px;display:flex;flex-direction:column;align-items:center;justify-content:center;background:#faf6ef;padding:60px 40px;text-align:center;">
-    <div style="font-size:28px;color:#d4aa4a;letter-spacing:0.4em;margin-bottom:24px;">☽ ✦ ☿</div>
-    <h1 style="font-size:36px;font-weight:normal;letter-spacing:0.1em;margin:0 0 10px;">Astrum &amp; Arcana</h1>
-    <p style="font-style:italic;font-size:16px;color:#5a4a32;margin:0 0 30px;">Pełny Raport Osobisty</p>
-    <div style="width:120px;height:1px;background:#b8902a;margin:0 auto 30px;"></div>
-    ${m.name?`<p style="font-size:20px;margin:0 0 10px;">${m.name}</p>`:''}
-    ${m.birthdate?`<p style="font-size:14px;color:#8a7a62;margin:0 0 6px;">${m.birthdate}${m.birthplace?' · '+m.birthplace:''}</p>`:''}
-    <p style="font-size:13px;color:#8a7a62;margin:20px 0 0;">${parts.join(' · ')}</p>
-    <p style="font-size:12px;color:#8a7a62;margin-top:60px;">${today}</p>
-  </div>`;
+  return `<!DOCTYPE html><html lang="pl"><head><meta charset="UTF-8">
+  <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;1,400&family=Cinzel:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:'EB Garamond',Georgia,serif;color:#2a2018;background:#faf6ef;}
+    .cover{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;text-align:center;padding:60px 40px;}
+    .sym{font-size:32px;color:#d4aa4a;letter-spacing:0.4em;margin-bottom:28px;}
+    h1{font-family:'Cinzel',serif;font-size:38px;font-weight:400;letter-spacing:0.1em;margin-bottom:10px;}
+    .sub{font-style:italic;font-size:18px;color:#5a4a32;margin-bottom:30px;}
+    .divider{width:100px;height:1px;background:#b8902a;margin:0 auto 30px;}
+    .person{font-size:20px;margin-bottom:8px;}
+    .person-detail{font-size:14px;color:#8a7a62;margin-bottom:6px;}
+    .parts{font-size:13px;color:#8a7a62;margin-top:20px;letter-spacing:0.05em;}
+    .date{font-size:13px;color:#8a7a62;margin-top:50px;}
+    @media print{@page{margin:0;}body{background:#faf6ef;}}
+  </style></head><body>
+  <div class="cover">
+    <div class="sym">☽ ✦ ☿</div>
+    <h1>Astrum &amp; Arcana</h1>
+    <div class="sub">Pełny Raport Osobisty</div>
+    <div class="divider"></div>
+    ${m.name?`<div class="person">${m.name}</div>`:''}
+    ${m.birthdate?`<div class="person-detail">${m.birthdate}${m.birthplace?' · '+m.birthplace:''}</div>`:''}
+    <div class="parts">${parts.join(' · ')}</div>
+    <div class="date">${today}</div>
+  </div></body></html>`;
 }
 
-const PDF_OPTS = {
-  margin:[10,10,10,10],
-  filename:'raport.pdf',
-  html2canvas:{scale:2,useCORS:true},
-  jsPDF:{unit:'mm',format:'a4',orientation:'portrait'},
-  pagebreak:{mode:['avoid-all','css']}
-};
-
-async function renderAndDownload(htmlContent, filename){
-  const el = document.createElement('div');
-  el.innerHTML = htmlContent;
-  el.style.cssText = 'position:fixed;left:-9999px;top:0;width:750px;background:#fff;';
-  document.body.appendChild(el);
-  const opts = Object.assign({}, PDF_OPTS, {filename});
-  await html2pdf().set(opts).from(el).save();
-  document.body.removeChild(el);
+function openPrintWindow(html){
+  const w = window.open('','_blank','width=800,height=900');
+  w.document.write(html);
+  w.document.close();
 }
 
 async function downloadPDF(type){
-  const today = new Date().toLocaleDateString('pl-PL',{day:'2-digit',month:'long',year:'numeric'});
-
   if(type==='astro'){
     const m=savedAstroMeta;
-    const meta=[
-      m.name?'Imię: '+m.name:'',
-      'Data: '+m.birthdate+(m.birthtime?' · Godzina: '+m.birthtime:''),
-      'Miejsce: '+m.birthplace+' · Płeć: '+m.gender,
-      'Obszar: '+m.focus
-    ].filter(Boolean);
-    await renderAndDownload(buildPDFHTML('Analiza Astrologiczna','Raport osobisty',meta,savedAstro),'astrum-astrologia.pdf');
+    const meta=[m.name?'Imię: '+m.name:'','Data urodzenia: '+m.birthdate+(m.birthtime?' · Godzina: '+m.birthtime:''),'Miejsce: '+m.birthplace+' · Płeć: '+m.gender,'Obszar: '+m.focus];
+    openPrintWindow(buildPrintHTML('Analiza Astrologiczna','Raport osobisty',meta,savedAstro));
   }
   else if(type==='tarot'){
     const m=savedTarotMeta;
-    const meta=[
-      'Układ: '+m.spreadName,
-      m.question?'Pytanie: '+m.question:'',
-      'Karty: '+m.cards.map(c=>c.pos+': '+c.name+(c.rev?' (odwr.)':'')).join(' · ')
-    ].filter(Boolean);
-    await renderAndDownload(buildPDFHTML('Odczyt Tarota','Interpretacja układu kart',meta,savedTarot),'astrum-tarot.pdf');
+    const meta=['Układ: '+m.spreadName,m.question?'Pytanie: '+m.question:'','Karty: '+m.cards.map(c=>c.pos+': '+c.name+(c.rev?' (odwrócona)':'')).join(' · ')];
+    openPrintWindow(buildPrintHTML('Odczyt Tarota','Interpretacja układu kart',meta,savedTarot));
   }
   else if(type==='num-person'){
     const m=savedNpMeta;
-    await renderAndDownload(buildPDFHTML('Numerologia — Osoba','Pełna analiza numerologiczna',['Imię: '+m.fullname,'Data: '+m.birthdate,'Obszar: '+m.focus],savedNumPerson),'astrum-numerologia-osoba.pdf');
+    openPrintWindow(buildPrintHTML('Numerologia — Osoba','Pełna analiza numerologiczna',['Imię i nazwisko: '+m.fullname,'Data urodzenia: '+m.birthdate,'Obszar: '+m.focus],savedNumPerson));
   }
   else if(type==='num-relation'){
     const m=savedNrMeta;
-    await renderAndDownload(buildPDFHTML('Numerologia — Relacja','Analiza kompatybilności',['Osoba 1: '+m.name1+' (ur. '+m.birth1+')','Osoba 2: '+m.name2+' (ur. '+m.birth2+')','Charakter: '+m.rtype],savedNumRelation),'astrum-numerologia-relacja.pdf');
+    openPrintWindow(buildPrintHTML('Numerologia — Relacja','Analiza kompatybilności',['Osoba 1: '+m.name1+' (ur. '+m.birth1+')','Osoba 2: '+m.name2+' (ur. '+m.birth2+')','Charakter relacji: '+m.rtype],savedNumRelation));
   }
   else if(type==='num-business'){
     const m=savedNbMeta;
-    const meta=['Firma: '+m.name];
-    if(m.date) meta.push('Data: '+m.date);
+    const meta=['Firma / Projekt: '+m.name];
+    if(m.date) meta.push('Data założenia: '+m.date);
     if(m.industry) meta.push('Branża: '+m.industry);
     meta.push('Obszar: '+m.focus);
-    await renderAndDownload(buildPDFHTML('Numerologia — Firma','Analiza biznesowa',meta,savedNumBusiness),'astrum-numerologia-firma.pdf');
+    openPrintWindow(buildPrintHTML('Numerologia — Firma','Analiza biznesowa',meta,savedNumBusiness));
   }
   else if(type==='synth'){
-    await renderAndDownload(buildPDFHTML('Synteza','Połączenie wszystkich analiz',[],savedSynth),'astrum-synteza.pdf');
+    openPrintWindow(buildPrintHTML('Synteza','Połączenie wszystkich analiz',[],savedSynth));
   }
   else if(type==='full'){
     const parts=[];
@@ -723,34 +790,67 @@ async function downloadPDF(type){
     if(savedNumBusiness) parts.push('Numerologia Firmy');
     if(savedSynth) parts.push('Synteza');
 
-    let fullHTML = buildCoverHTML(parts) + '<div style="page-break-after:always;"></div>';
-
+    // Build full multi-section document
+    const sections=[];
     const m=savedAstroMeta;
-    if(savedAstro){
-      const meta=[m.name?'Imię: '+m.name:'','Data: '+m.birthdate+(m.birthtime?' · '+m.birthtime:''),'Miejsce: '+m.birthplace].filter(Boolean);
-      fullHTML += buildPDFHTML('Analiza Astrologiczna','Część I',meta,savedAstro)+'<div style="page-break-after:always;"></div>';
-    }
-    if(savedTarot){
-      const mt=savedTarotMeta;
-      const meta=['Układ: '+mt.spreadName,mt.question?'Pytanie: '+mt.question:'','Karty: '+mt.cards.map(c=>c.pos+': '+c.name+(c.rev?' ↓':'')).join(', ')].filter(Boolean);
-      fullHTML += buildPDFHTML('Odczyt Tarota','Część II',meta,savedTarot)+'<div style="page-break-after:always;"></div>';
-    }
-    if(savedNumPerson){
-      const mn=savedNpMeta;
-      fullHTML += buildPDFHTML('Numerologia Osoby','Część III',['Imię: '+mn.fullname,'Data: '+mn.birthdate],savedNumPerson)+'<div style="page-break-after:always;"></div>';
-    }
-    if(savedNumRelation){
-      const mr=savedNrMeta;
-      fullHTML += buildPDFHTML('Numerologia Relacji','Część IV',['Osoba 1: '+mr.name1,'Osoba 2: '+mr.name2],savedNumRelation)+'<div style="page-break-after:always;"></div>';
-    }
-    if(savedNumBusiness){
-      const mb=savedNbMeta;
-      fullHTML += buildPDFHTML('Numerologia Firmy','Część V',['Firma: '+mb.name],savedNumBusiness)+'<div style="page-break-after:always;"></div>';
-    }
-    if(savedSynth){
-      fullHTML += buildPDFHTML('Synteza','Połączenie analiz',[],savedSynth);
-    }
-    await renderAndDownload(fullHTML,'astrum-pelny-raport.pdf');
+    if(savedAstro) sections.push({title:'Analiza Astrologiczna',sub:'Część I',meta:[m.name?'Imię: '+m.name:'','Data: '+m.birthdate+(m.birthtime?' · '+m.birthtime:''),'Miejsce: '+m.birthplace].filter(Boolean),text:savedAstro});
+    if(savedTarot){const mt=savedTarotMeta;sections.push({title:'Odczyt Tarota',sub:'Część II',meta:['Układ: '+mt.spreadName,mt.question?'Pytanie: '+mt.question:''].filter(Boolean),text:savedTarot});}
+    if(savedNumPerson){const mn=savedNpMeta;sections.push({title:'Numerologia Osoby',sub:'Część III',meta:['Imię: '+mn.fullname,'Data: '+mn.birthdate],text:savedNumPerson});}
+    if(savedNumRelation){const mr=savedNrMeta;sections.push({title:'Numerologia Relacji',sub:'Część IV',meta:['Osoba 1: '+mr.name1,'Osoba 2: '+mr.name2],text:savedNumRelation});}
+    if(savedNumBusiness){const mb=savedNbMeta;sections.push({title:'Numerologia Firmy',sub:'Część V',meta:['Firma: '+mb.name],text:savedNumBusiness});}
+    if(savedSynth) sections.push({title:'Synteza',sub:'Część końcowa',meta:[],text:savedSynth});
+
+    const today = new Date().toLocaleDateString('pl-PL',{day:'2-digit',month:'long',year:'numeric'});
+    let fullHTML = `<!DOCTYPE html><html lang="pl"><head><meta charset="UTF-8">
+    <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;1,400&family=Cinzel:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+      *{box-sizing:border-box;margin:0;padding:0}
+      body{font-family:'EB Garamond',Georgia,serif;color:#2a2018;background:#fff;}
+      .cover{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;text-align:center;padding:60px 40px;background:#faf6ef;page-break-after:always;}
+      .sym{font-size:32px;color:#d4aa4a;letter-spacing:0.4em;margin-bottom:24px;}
+      .cover h1{font-family:'Cinzel',serif;font-size:36px;font-weight:400;letter-spacing:0.1em;margin-bottom:8px;}
+      .cover .sub{font-style:italic;font-size:16px;color:#5a4a32;margin-bottom:28px;}
+      .divider{width:100px;height:1px;background:#b8902a;margin:0 auto 28px;}
+      .section{max-width:720px;margin:0 auto;padding:40px 50px;page-break-after:always;}
+      .sec-header{display:flex;justify-content:space-between;padding-bottom:10px;border-bottom:2px solid #b8902a;margin-bottom:24px;}
+      .sec-brand{font-family:'Cinzel',serif;font-size:12px;color:#8a7a62;letter-spacing:0.1em;}
+      h2{font-family:'Cinzel',serif;font-size:24px;font-weight:400;text-align:center;margin-bottom:5px;}
+      .sec-sub{text-align:center;font-style:italic;color:#8a7a62;font-size:14px;margin-bottom:22px;}
+      .meta-box{background:#fdf9f2;border:1px solid #e8d5a0;border-radius:4px;padding:12px 16px;margin-bottom:22px;}
+      .meta-row{font-size:13px;color:#5a4a32;padding:2px 0;}
+      .body-text{font-size:15px;line-height:1.9;white-space:pre-wrap;}
+      .footer{margin-top:36px;padding-top:12px;border-top:1px solid #e8d5a0;text-align:center;font-size:10px;color:#8a7a62;font-family:'Cinzel',serif;}
+      .no-print{position:fixed;bottom:20px;right:20px;}
+      @media print{.no-print{display:none!important;}@page{margin:15mm;}.cover{min-height:100vh;}}
+    </style></head><body>
+    <div class="cover">
+      <div class="sym">☽ ✦ ☿</div>
+      <h1>Astrum &amp; Arcana</h1>
+      <div class="sub">Pełny Raport Osobisty</div>
+      <div class="divider"></div>
+      ${m.name?`<p style="font-size:20px;margin-bottom:8px;">${m.name}</p>`:''}
+      ${m.birthdate?`<p style="font-size:14px;color:#8a7a62;margin-bottom:6px;">${m.birthdate}${m.birthplace?' · '+m.birthplace:''}</p>`:''}
+      <p style="font-size:13px;color:#8a7a62;margin-top:16px;">${parts.join(' · ')}</p>
+      <p style="font-size:12px;color:#8a7a62;margin-top:50px;">${today}</p>
+    </div>`;
+
+    sections.forEach(s=>{
+      const metaRows=s.meta.filter(Boolean).map(l=>`<div class="meta-row">${l}</div>`).join('');
+      const cleaned=s.text.replace(/\*\*/g,'').replace(/\*/g,'').replace(/#{1,3} /g,'');
+      fullHTML+=`<div class="section">
+        <div class="sec-header"><span class="sec-brand">Astrum &amp; Arcana</span><span class="sec-brand">${today}</span></div>
+        <h2>${s.title}</h2><div class="sec-sub">${s.sub}</div>
+        ${metaRows?`<div class="meta-box">${metaRows}</div>`:''}
+        <div class="body-text">${cleaned}</div>
+        <div class="footer">Astrum &amp; Arcana · ${today}</div>
+      </div>`;
+    });
+
+    fullHTML+=`<div class="no-print">
+      <button onclick="window.print()" style="font-family:'Cinzel',serif;font-size:13px;background:#b8902a;color:#fff;border:none;padding:10px 22px;border-radius:4px;cursor:pointer;">Drukuj / Zapisz PDF</button>
+      <button onclick="window.close()" style="font-family:'Cinzel',serif;font-size:13px;background:transparent;color:#8a7a62;border:1px solid #e8d5a0;padding:10px 16px;border-radius:4px;cursor:pointer;margin-left:8px;">Zamknij</button>
+    </div></body></html>`;
+    openPrintWindow(fullHTML);
   }
 }
 
