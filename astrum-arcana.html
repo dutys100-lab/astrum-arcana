@@ -447,7 +447,7 @@ async function callClaude(prompt,resultEl){
     const resp=await fetch('https://api.groq.com/openai/v1/chat/completions',{
       method:'POST',
       headers:{'Content-Type':'application/json','Authorization':'Bearer '+GROQ_KEY},
-      body:JSON.stringify({model:'llama-3.3-70b-versatile',messages:[{role:'system',content:'Jesteś poetką duszy, astrologką i tarocistrką. Piszesz zawsze wyłącznie po polsku — piękną, płynną, ciepłą prozą. Jak mądra przyjaciółka pisząca list. Nigdy nie używasz gwiazdek, hashtagów ani list numerowanych.'},{role:'user',content:prompt}],max_tokens:3000,temperature:0.9})
+      body:JSON.stringify({model:'llama-3.3-70b-versatile',messages:[{role:'system',content:'Jesteś poetką duszy, astrologką i tarocistrką. Piszesz zawsze wyłącznie po polsku — piękną, płynną, ciepłą prozą. Jak mądra przyjaciółka pisząca list. Nigdy nie używasz gwiazdek, hashtagów ani list numerowanych. Piszesz ZAWSZE w drugiej osobie — bezpośrednio do osoby, używając "Ty", "Twój", "Jesteś" — nigdy w trzeciej osobie.'},{role:'user',content:prompt}],max_tokens:3000,temperature:0.9})
     });
     const data=await resp.json();
     if(data.error){resultEl.className='result-box visible';resultEl.textContent='Błąd API: '+data.error.message;return '';}
@@ -469,7 +469,7 @@ async function analyzeAstro(){
     mood=document.getElementById('mood').value,extra=document.getElementById('extra').value;
   const btn=document.getElementById('astro-btn');btn.disabled=true;
   savedAstroMeta={name,gender,birthdate:bd,birthtime:bt,birthplace:bp,focus,mood};
-  const prompt=`Jesteś doświadczoną astrologką i poetką duszy. Piszesz zawsze piękną, płynną polszczyzną — jak mądra przyjaciółka pisząca list do bliskiej osoby. Twoje analizy są ciepłe, głębokie, pełne obrazowych metafor. Nigdy nie używasz gwiazdek, hashtagów ani numerowanych list — tylko płynna proza w akapitach.
+  const prompt=`Jesteś doświadczoną astrologką i poetką duszy. Piszesz zawsze piękną, płynną polszczyzną — jak mądra przyjaciółka pisząca list do bliskiej osoby. Twoje analizy są ciepłe, głębokie, pełne obrazowych metafor. Nigdy nie używasz gwiazdek, hashtagów ani numerowanych list — tylko płynna proza w akapitach. Piszesz ZAWSZE w drugiej osobie — bezpośrednio do osoby, używając "Ty", "Twój", "Jesteś", "Czujesz" — nigdy w trzeciej osobie. Jakbyś pisała list do tej konkretnej osoby.
 
 Osoba: ${name||'(nie podano)'}, ${gender}, urodzona ${bd}${bt?' o godzinie '+bt:''} w ${bp}.
 Obszar zainteresowania: ${focus}.${mood?'\nAktualny nastrój: '+mood:''}${extra?'\nPytanie: '+extra:''}
@@ -510,7 +510,7 @@ async function interpretTarot(){
   const cardsDesc=names.map((n,i)=>`- ${spread.positions[i]||'Pozycja '+(i+1)}: ${n}${selectedCards[n]?' (ODWROCONA)':''}`).join('\n');
   savedTarotMeta={spreadName,question,cards:names.map((n,i)=>({pos:spread.positions[i]||'',name:n,rev:selectedCards[n]}))};
   const btn=document.getElementById('tarot-btn');btn.disabled=true;
-  const prompt=`Jesteś doświadczoną tarocistrką i przewodniczką duchową. Piszesz zawsze piękną, płynną polszczyzną — jak mądra przyjaciółka rozmawiająca przy herbacie. Twoje interpretacje są ciepłe, głębokie, pełne mądrości i obrazowych metafor. Nigdy nie używasz gwiazdek, hashtagów ani numerowanych list — tylko płynna proza w akapitach.
+  const prompt=`Jesteś doświadczoną tarocistrką i przewodniczką duchową. Piszesz zawsze piękną, płynną polszczyzną — jak mądra przyjaciółka rozmawiająca przy herbacie. Twoje interpretacje są ciepłe, głębokie, pełne mądrości i obrazowych metafor. Nigdy nie używasz gwiazdek, hashtagów ani numerowanych list — tylko płynna proza w akapitach. Piszesz ZAWSZE w drugiej osobie — bezpośrednio do osoby, używając "Ty", "Twój", "Jesteś" — nigdy w trzeciej osobie.
 
 Układ: ${spreadName}
 ${question?'Pytanie / intencja: '+question:''}
@@ -544,7 +544,7 @@ async function analyzeNum(type){
     if(!fn||!bd){alert('Podaj imię, nazwisko i datę urodzenia.');return;}
     const focus=document.getElementById('np-focus').value,extra=document.getElementById('np-extra').value;
     savedNpMeta={fullname:fn,birthdate:bd,focus};
-    prompt=`Jesteś doświadczoną numerolożką i przewodniczką duchową. Piszesz zawsze piękną, płynną polszczyzną — jak mądra przyjaciółka pisząca list do bliskiej osoby. Nigdy nie używasz gwiazdek, hashtagów ani numerowanych list — tylko płynna proza w akapitach. Przy każdej liczbie podaj jej wartość naturalnie w tekście.
+    prompt=`Jesteś doświadczoną numerolożką i przewodniczką duchową. Piszesz zawsze piękną, płynną polszczyzną — jak mądra przyjaciółka pisząca list do bliskiej osoby. Nigdy nie używasz gwiazdek, hashtagów ani numerowanych list — tylko płynna proza w akapitach. Piszesz ZAWSZE w drugiej osobie — bezpośrednio do osoby, używając "Ty", "Twój", "Jesteś" — nigdy w trzeciej osobie. Przy każdej liczbie podaj jej wartość naturalnie w tekście.
 
 Osoba: ${fn}, urodzona ${bd}.
 Obszar zainteresowania: ${focus}.${extra?'\nPytanie: '+extra:''}
@@ -666,7 +666,7 @@ async function runSynthesis(){
   if(!parts.length){alert('Zaznacz co najmniej jedną analizę.');return;}
   const btn=document.getElementById('synth-btn');btn.disabled=true;
   const joined=parts.join('\n\n---\n\n');
-  const prompt='Jesteś mądrą przewodniczką duchową, astrologką i tarocistrką — piszesz zawsze piękną, płynną polszczyzną jak poetka i mądra przyjaciółka jednocześnie. Nigdy nie używasz gwiazdek, hashtagów ani list numerowanych.\n\nMasz do dyspozycji następujące analizy:\n\n'+joined+'\n\n---\n\nNapisz głęboką SYNTEZĘ w pięknej polskiej prozie — jeden spójny, poetycki tekst który:\n\nZaczyna się od akapitu o dominującej energii i głównym temacie który wyłania się ze wszystkich analiz — co gwiazdy, karty i liczby mówią jednym głosem. Minimum 5 zdań.\n\nNastępnie opisuje wzajemne wzmocnienia i połączenia między systemami — gdzie astrologia, tarot i numerologia pokazują to samo innymi słowami. Co to powtórzenie oznacza dla tej osoby. Minimum 5 zdań.\n\nPotem opisuje główne wyzwanie lub lekcję którą ta osoba niesie w tym momencie życia — z czułością i bez oceniania. Minimum 4 zdania.\n\nNastępnie daje konkretną, ciepłą i praktyczną radę — co ta osoba może zrobić już teraz, w tym tygodniu, żeby działać zgodnie z energią którą pokazują wszystkie analizy. Minimum 4 zdania.\n\nZakończ jednym pięknym, zapamiętanym na długo zdaniem-mantrą dla tej duszy.\n\nMinimum 600 słów. Żadnych gwiazdek, hashtagów ani numerów.';
+  const prompt='Jesteś mądrą przewodniczką duchową, astrologką i tarocistrką — piszesz zawsze piękną, płynną polszczyzną jak poetka i mądra przyjaciółka jednocześnie. Nigdy nie używasz gwiazdek, hashtagów ani list numerowanych. Piszesz ZAWSZE w drugiej osobie — bezpośrednio do osoby, używając "Ty", "Twój", "Jesteś" — nigdy w trzeciej osobie.\n\nMasz do dyspozycji następujące analizy:\n\n'+joined+'\n\n---\n\nNapisz głęboką SYNTEZĘ w pięknej polskiej prozie — jeden spójny, poetycki tekst który:\n\nZaczyna się od akapitu o dominującej energii i głównym temacie który wyłania się ze wszystkich analiz — co gwiazdy, karty i liczby mówią jednym głosem. Minimum 5 zdań.\n\nNastępnie opisuje wzajemne wzmocnienia i połączenia między systemami — gdzie astrologia, tarot i numerologia pokazują to samo innymi słowami. Co to powtórzenie oznacza dla tej osoby. Minimum 5 zdań.\n\nPotem opisuje główne wyzwanie lub lekcję którą ta osoba niesie w tym momencie życia — z czułością i bez oceniania. Minimum 4 zdania.\n\nNastępnie daje konkretną, ciepłą i praktyczną radę — co ta osoba może zrobić już teraz, w tym tygodniu, żeby działać zgodnie z energią którą pokazują wszystkie analizy. Minimum 4 zdania.\n\nZakończ jednym pięknym, zapamiętanym na długo zdaniem-mantrą dla tej duszy.\n\nMinimum 600 słów. Żadnych gwiazdek, hashtagów ani numerów.';
   const result=await callClaude(prompt,document.getElementById('synth-result'));
   if(result){savedSynth=result;document.getElementById('synth-pdf-row').style.display='block';}
   btn.disabled=false;
