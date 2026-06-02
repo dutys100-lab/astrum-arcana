@@ -854,6 +854,49 @@ async function downloadPDF(type){
   }
 }
 
+// ── CLEAR ──
+function clearSection(section){
+  function resetResult(id,pdfRowId){
+    const r=document.getElementById(id);
+    if(r){r.textContent='';r.className='result-box';r.style.display='none';}
+    if(pdfRowId){const p=document.getElementById(pdfRowId);if(p)p.style.display='none';}
+  }
+  if(section==='astro'){
+    ['name','birthplace','extra'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+    ['birthdate','birthtime'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+    ['gender','focus','mood'].forEach(id=>{const el=document.getElementById(id);if(el)el.selectedIndex=0;});
+    resetResult('astro-result','astro-pdf-row');
+    savedAstro='';savedAstroMeta={};
+  }
+  else if(section==='tarot'){
+    const tq=document.getElementById('tarot-question');if(tq)tq.value='';
+    const ss=document.getElementById('spread-select');if(ss)ss.selectedIndex=0;
+    const rm=document.getElementById('rev-mode');if(rm)rm.checked=false;
+    selectedCards={};
+    document.querySelectorAll('.chip').forEach(c=>c.className='chip');
+    updateSpread();
+    resetResult('tarot-result','tarot-pdf-row');
+    savedTarot='';savedTarotMeta={};
+  }
+  else if(section==='num'){
+    const active=document.querySelector('.inner-panel.active');
+    if(!active) return;
+    active.querySelectorAll('input[type="text"],input[type="date"],textarea').forEach(el=>el.value='');
+    active.querySelectorAll('select').forEach(el=>el.selectedIndex=0);
+    if(active.id==='num-person'){resetResult('np-result','np-pdf-row');savedNumPerson='';savedNpMeta={};}
+    else if(active.id==='num-relation'){resetResult('nr-result','nr-pdf-row');savedNumRelation='';savedNrMeta={};}
+    else if(active.id==='num-business'){resetResult('nb-result','nb-pdf-row');savedNumBusiness='';savedNbMeta={};}
+  }
+  else if(section==='synth'){
+    resetResult('synth-result',null);
+    const sp=document.getElementById('synth-pdf-row');if(sp)sp.style.display='none';
+    savedSynth='';
+  }
+  checkUnlock();
+  updateSynthStatus();
+}
+
+
 updateSynthStatus();
 </script>
 </body>
