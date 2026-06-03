@@ -358,21 +358,21 @@ function renderSynthCheckboxes(){
 
 async function callClaude(prompt,resultEl){
   resultEl.style.display='block';resultEl.className='result-box visible loading';
-  resultEl.textContent='\u2746 Odczytuj\u0119 energie\u2026 prosz\u0119 czeka\u0107\u2026';
+  resultEl.textContent='❆ Odczytuję energie… proszę czekać…';
   try{
-    var resp=await fetch('https://api.anthropic.com/v1/messages',{
+    var resp=await fetch('https://astrum-proxy.dutys100.workers.dev',{
       method:'POST',
-      headers:{'Content-Type':'application/json','x-api-key':CLAUDE_KEY,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
+      headers:{'Content-Type':'application/json'},
       body:JSON.stringify({model:'claude-haiku-4-5-20251001',max_tokens:2000,messages:[{role:'user',content:prompt}]})
     });
     var data=await resp.json();
-    if(data.error){resultEl.className='result-box visible';resultEl.textContent='B\u0142\u0105d API: '+data.error.message;return '';}
+    if(data.error){resultEl.className='result-box visible';resultEl.textContent='Błąd API: '+data.error.message;return '';}
     resultEl.className='result-box visible';
-    var text=data.content&&data.content[0]?data.content[0].text:'Przepraszam, wyst\u0105pi\u0142 b\u0142\u0105d.';
+    var text=data.content&&data.content[0]?data.content[0].text:'Przepraszam, wystąpił błąd.';
     resultEl.textContent=text;return text;
   }catch(e){
     resultEl.className='result-box visible';
-    resultEl.textContent='B\u0142\u0105d po\u0142\u0105czenia: '+e.message;return '';
+    resultEl.textContent='Błąd połączenia: '+e.message;return '';
   }
 }
 
