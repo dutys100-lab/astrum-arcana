@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Astrum & Arcana</title>
+<title>Astrum &amp; Arcana</title>
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600&family=EB+Garamond:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
@@ -37,6 +37,10 @@ body{font-family:'EB Garamond',serif;background:var(--cream);color:var(--ink);mi
 .inner-tab:hover{color:var(--ink);}
 .inner-tab.active{color:var(--gold);border-bottom-color:var(--gold);}
 .inner-panel{display:none;}.inner-panel.active{display:block;}
+.depth-toggle{display:flex;gap:0;margin-bottom:1rem;border:1px solid var(--gold-border);border-radius:6px;overflow:hidden;}
+.depth-btn{flex:1;font-family:'Cinzel',serif;font-size:0.72rem;letter-spacing:0.1em;padding:0.5rem 0.8rem;border:none;background:transparent;color:var(--ink-soft);cursor:pointer;transition:all 0.2s;}
+.depth-btn.active{background:var(--gold);color:#fff;}
+.depth-btn:first-child{border-right:1px solid var(--gold-border);}
 .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:0.9rem;margin-bottom:1rem;}
 .fg{display:flex;flex-direction:column;gap:0.3rem;}.fg.full{grid-column:1/-1;}
 label{font-size:0.68rem;letter-spacing:0.18em;text-transform:uppercase;color:var(--ink-soft);font-family:'Cinzel',serif;}
@@ -102,8 +106,12 @@ textarea{resize:vertical;min-height:52px;}
   <!-- ASTROLOGIA -->
   <div class="section active" id="sec-astro">
     <div class="sec-header">
-      <div><h2>&#9789; Astrologia</h2><p>Wprowad&#378; dane urodzeniowe &mdash; AI stworzy Twoj&#261; analiz&#281;</p></div>
+      <div><h2>&#9789; Astrologia</h2><p>Wprowad&#378; dane urodzeniowe</p></div>
       <button class="btn-clear" onclick="clearSection('astro')">&#8635; Wyczy&#347;&#263;</button>
+    </div>
+    <div class="depth-toggle">
+      <button class="depth-btn active" id="astro-simple-btn" onclick="setDepth('astro','simple')">&#9789; Prosta analiza</button>
+      <button class="depth-btn" id="astro-deep-btn" onclick="setDepth('astro','deep')">&#10022; Analiza pog&#322;&#281;biona</button>
     </div>
     <div class="form-grid">
       <div class="fg"><label>Imi&#281; (opcjonalnie)</label><input type="text" id="name" placeholder="Twoje imi&#281;..."></div>
@@ -117,27 +125,31 @@ textarea{resize:vertical;min-height:52px;}
     </div>
     <button class="btn-main" id="astro-btn" onclick="analyzeAstro()">&#10022; Oblicz analiz&#281; astrologiczn&#261;</button>
     <div class="result-box" id="astro-result"></div>
-    <div class="btn-row" id="astro-pdf-row" style="display:none;"><button class="btn-pdf" onclick="downloadPDF('astro')">&#8659; Pobierz PDF &mdash; Astrologia</button></div>
+    <div class="btn-row" id="astro-pdf-row" style="display:none;"><button class="btn-pdf" onclick="downloadPDF('astro')">&#8659; Pobierz PDF</button></div>
   </div>
 
   <!-- TAROT -->
   <div class="section" id="sec-tarot">
     <div class="sec-header">
-      <div><h2>&#10022; Tarot</h2><p>Wybierz uk&#322;ad, zaznacz karty &mdash; AI zinterpretuje przekaz</p></div>
+      <div><h2>&#10022; Tarot</h2><p>Wybierz uk&#322;ad, zaznacz karty</p></div>
       <button class="btn-clear" onclick="clearSection('tarot')">&#8635; Wyczy&#347;&#263;</button>
+    </div>
+    <div class="depth-toggle">
+      <button class="depth-btn active" id="tarot-simple-btn" onclick="setDepth('tarot','simple')">&#10022; Prosta interpretacja</button>
+      <button class="depth-btn" id="tarot-deep-btn" onclick="setDepth('tarot','deep')">&#9789; Pog&#322;&#281;biona interpretacja</button>
     </div>
     <div class="form-grid">
       <div class="fg full"><label>Uk&#322;ad kart</label><select id="spread-select" onchange="updateSpread()">
-        <option value="1">1 karta &mdash; Przekaz dnia</option>
-        <option value="3-past">3 karty &mdash; Przesz&#322;o&#347;&#263; &middot; Tera&#378;niejszo&#347;&#263; &middot; Przysz&#322;o&#347;&#263;</option>
-        <option value="3-mind">3 karty &mdash; Umys&#322; &middot; Cia&#322;o &middot; Duch</option>
-        <option value="3-sit">3 karty &mdash; Sytuacja &middot; Dzia&#322;anie &middot; Wynik</option>
+        <option value="1">1 karta - Przekaz dnia</option>
+        <option value="3-past">3 karty - Przesz&#322;o&#347;&#263; / Tera&#378;niejszo&#347;&#263; / Przysz&#322;o&#347;&#263;</option>
+        <option value="3-mind">3 karty - Umys&#322; / Cia&#322;o / Duch</option>
+        <option value="3-sit">3 karty - Sytuacja / Dzia&#322;anie / Wynik</option>
         <option value="celtic">Celtycki Krzy&#380; (10 kart)</option>
         <option value="horseshoe">Podkowa (7 kart)</option>
         <option value="star">Gwiazda (6 kart)</option>
         <option value="relationship">Relacja (6 kart)</option>
         <option value="decision">Rozstaj dr&#243;g (5 kart)</option>
-        <option value="year">Uk&#322;ad Roczny &mdash; 12 miesi&#281;cy</option>
+        <option value="year">Uk&#322;ad Roczny - 12 miesi&#281;cy</option>
       </select></div>
       <div class="fg full"><label>Twoje pytanie lub intencja</label><input type="text" id="tarot-question" placeholder="O czym chcesz si&#281; dowiedzie&#263;? (opcjonalnie)"></div>
     </div>
@@ -146,19 +158,19 @@ textarea{resize:vertical;min-height:52px;}
     <div class="counter">Wybrano: <em id="sel-count">0</em> / <em id="need-count">1</em></div>
     <div class="sel-panel"><div class="sel-label">Wybrane karty</div><div class="sel-list" id="selected-list"><span style="font-size:0.83rem;color:var(--ink-soft);font-style:italic;">Kliknij karty poni&#380;ej...</span></div></div>
     <div class="arcana-label">&#10022; Wielkie Arkana</div><div class="cards-grid" id="major-grid"></div>
-    <div class="arcana-label">&#9876; Miecze</div><div class="cards-grid" id="swords-grid"></div>
-    <div class="arcana-label">&#9830; Puchary</div><div class="cards-grid" id="cups-grid"></div>
-    <div class="arcana-label">&#10022; R&#243;&#380;d&#380;ki</div><div class="cards-grid" id="wands-grid"></div>
-    <div class="arcana-label">&#9789; Pentakle</div><div class="cards-grid" id="pentacles-grid"></div>
+    <div class="arcana-label">Miecze</div><div class="cards-grid" id="swords-grid"></div>
+    <div class="arcana-label">Puchary</div><div class="cards-grid" id="cups-grid"></div>
+    <div class="arcana-label">R&#243;&#380;d&#380;ki</div><div class="cards-grid" id="wands-grid"></div>
+    <div class="arcana-label">Pentakle</div><div class="cards-grid" id="pentacles-grid"></div>
     <button class="btn-main" id="tarot-btn" onclick="interpretTarot()" style="margin-top:1.3rem;">&#10022; Interpretuj uk&#322;ad</button>
     <div class="result-box" id="tarot-result"></div>
-    <div class="btn-row" id="tarot-pdf-row" style="display:none;"><button class="btn-pdf" onclick="downloadPDF('tarot')">&#8659; Pobierz PDF &mdash; Tarot</button></div>
+    <div class="btn-row" id="tarot-pdf-row" style="display:none;"><button class="btn-pdf" onclick="downloadPDF('tarot')">&#8659; Pobierz PDF</button></div>
   </div>
 
   <!-- NUMEROLOGIA -->
   <div class="section" id="sec-num">
     <div class="sec-header">
-      <div><h2>&#9673; Numerologia</h2><p>Liczby jako j&#281;zyk duszy &mdash; trzy wymiary analizy</p></div>
+      <div><h2>&#9673; Numerologia</h2><p>Liczby jako j&#281;zyk duszy</p></div>
       <button class="btn-clear" onclick="clearSection('num')">&#8635; Wyczy&#347;&#263;</button>
     </div>
     <div class="inner-tabs">
@@ -167,19 +179,23 @@ textarea{resize:vertical;min-height:52px;}
       <button class="inner-tab" onclick="showInnerTab('num-business',this)">Firma / Projekt</button>
     </div>
     <div class="inner-panel active" id="num-person">
-      <div class="num-info"><strong>Pe&#322;na analiza numerologiczna osoby</strong>Oblicza Liczb&#281; &#379;ycia, Przeznaczenia, Duszy, Osobowo&#347;ci, Rok Osobisty, Liczb&#281; Urodzin i aktywne cykle &#380;yciowe.</div>
+      <div class="depth-toggle">
+        <button class="depth-btn active" id="num-simple-btn" onclick="setDepth('num','simple')">&#9673; Prosta analiza</button>
+        <button class="depth-btn" id="num-deep-btn" onclick="setDepth('num','deep')">&#10022; Analiza pog&#322;&#281;biona</button>
+      </div>
+      <div class="num-info"><strong>Pe&#322;na analiza numerologiczna osoby</strong>Oblicza Liczb&#281; &#379;ycia, Przeznaczenia, Duszy, Osobowo&#347;ci, Rok Osobisty i Liczb&#281; Urodzin.</div>
       <div class="form-grid">
-        <div class="fg full"><label>Imi&#281; i nazwisko (pe&#322;ne, jak w akcie urodzenia)</label><input type="text" id="np-fullname" placeholder="np. Anna Maria Kowalska"></div>
+        <div class="fg full"><label>Imi&#281; i nazwisko (pe&#322;ne)</label><input type="text" id="np-fullname" placeholder="np. Anna Maria Kowalska"></div>
         <div class="fg"><label>Data urodzenia</label><input type="date" id="np-birthdate"></div>
         <div class="fg"><label>Obszar zainteresowania</label><select id="np-focus"><option>Pe&#322;na analiza</option><option>Mi&#322;o&#347;&#263; i relacje</option><option>Kariera i powo&#322;anie</option><option>Rozw&#243;j duchowy</option><option>Finanse i obfito&#347;&#263;</option><option>Zdrowie i energia</option></select></div>
-        <div class="fg full"><label>Pytanie lub kontekst (opcjonalnie)</label><textarea id="np-extra" placeholder="Co chcesz lepiej zrozumie&#263;?"></textarea></div>
+        <div class="fg full"><label>Pytanie (opcjonalnie)</label><textarea id="np-extra" placeholder="Co chcesz lepiej zrozumie&#263;?"></textarea></div>
       </div>
       <button class="btn-main" id="np-btn" onclick="analyzeNum('person')">&#9673; Oblicz analiz&#281; numerologiczn&#261;</button>
       <div class="result-box" id="np-result"></div>
-      <div class="btn-row" id="np-pdf-row" style="display:none;"><button class="btn-pdf" onclick="downloadPDF('num-person')">&#8659; Pobierz PDF &mdash; Numerologia Osoby</button></div>
+      <div class="btn-row" id="np-pdf-row" style="display:none;"><button class="btn-pdf" onclick="downloadPDF('num-person')">&#8659; Pobierz PDF</button></div>
     </div>
     <div class="inner-panel" id="num-relation">
-      <div class="num-info"><strong>Kompatybilno&#347;&#263; numerologiczna dw&#243;ch os&#243;b</strong>Analiza zgodno&#347;ci, dynamiki relacji, wsp&#243;lnych wyzwa&#324; i potencja&#322;u.</div>
+      <div class="num-info"><strong>Kompatybilno&#347;&#263; numerologiczna dw&#243;ch os&#243;b</strong>Analiza zgodno&#347;ci, dynamiki relacji i potencja&#322;u.</div>
       <div class="form-grid">
         <div class="fg full"><label style="color:var(--gold);">Pierwsza osoba</label></div>
         <div class="fg full"><label>Imi&#281; i nazwisko</label><input type="text" id="nr-name1" placeholder="np. Anna Kowalska"></div>
@@ -189,25 +205,25 @@ textarea{resize:vertical;min-height:52px;}
         <div class="fg full"><label>Imi&#281; i nazwisko</label><input type="text" id="nr-name2" placeholder="np. Piotr Nowak"></div>
         <div class="fg"><label>Data urodzenia</label><input type="date" id="nr-birth2"></div>
         <div class="fg"><label>Charakter relacji</label><select id="nr-type"><option>Zwi&#261;zek romantyczny</option><option>Ma&#322;&#380;e&#324;stwo</option><option>Przyjazn</option><option>Wsp&#243;&#322;praca biznesowa</option><option>Relacja rodzinna</option></select></div>
-        <div class="fg full"><label>Pytanie lub kontekst (opcjonalnie)</label><textarea id="nr-extra" placeholder="Co chcesz lepiej zrozumie&#263; w tej relacji?"></textarea></div>
+        <div class="fg full"><label>Pytanie (opcjonalnie)</label><textarea id="nr-extra" placeholder="Co chcesz lepiej zrozumie&#263; w tej relacji?"></textarea></div>
       </div>
       <button class="btn-main" id="nr-btn" onclick="analyzeNum('relation')">&#9673; Oblicz kompatybilno&#347;&#263;</button>
       <div class="result-box" id="nr-result"></div>
-      <div class="btn-row" id="nr-pdf-row" style="display:none;"><button class="btn-pdf" onclick="downloadPDF('num-relation')">&#8659; Pobierz PDF &mdash; Numerologia Relacji</button></div>
+      <div class="btn-row" id="nr-pdf-row" style="display:none;"><button class="btn-pdf" onclick="downloadPDF('num-relation')">&#8659; Pobierz PDF</button></div>
     </div>
     <div class="inner-panel" id="num-business">
-      <div class="num-info"><strong>Numerologia firmy i projektu</strong>Analiza nazwy, daty za&#322;o&#380;enia, energii biznesu i Liczby Sukcesu.</div>
+      <div class="num-info"><strong>Numerologia firmy i projektu</strong>Analiza nazwy, daty za&#322;o&#380;enia i energii biznesu.</div>
       <div class="form-grid">
         <div class="fg full"><label>Nazwa firmy / projektu</label><input type="text" id="nb-name" placeholder="np. Studio Kreatywne Luz"></div>
-        <div class="fg"><label>Data za&#322;o&#380;enia / startu</label><input type="date" id="nb-date"></div>
-        <div class="fg"><label>Bran&#380;a / rodzaj dzia&#322;alno&#347;ci</label><input type="text" id="nb-industry" placeholder="np. coaching, sklep online..."></div>
+        <div class="fg"><label>Data za&#322;o&#380;enia</label><input type="date" id="nb-date"></div>
+        <div class="fg"><label>Bran&#380;a</label><input type="text" id="nb-industry" placeholder="np. coaching, sklep online..."></div>
         <div class="fg full"><label>Imi&#281; w&#322;a&#347;ciciela (opcjonalnie)</label><input type="text" id="nb-owner" placeholder="Imi&#281; i nazwisko w&#322;a&#347;ciciela"></div>
         <div class="fg"><label>Obszar analizy</label><select id="nb-focus"><option>Pe&#322;na analiza firmy</option><option>Energia nazwy i branding</option><option>Najlepszy czas na dzia&#322;anie</option><option>Finanse i wzrost</option><option>Partnerstwo biznesowe</option></select></div>
-        <div class="fg full"><label>Pytanie lub kontekst (opcjonalnie)</label><textarea id="nb-extra" placeholder="Co chcesz wiedzie&#263; o swojej firmie?"></textarea></div>
+        <div class="fg full"><label>Pytanie (opcjonalnie)</label><textarea id="nb-extra" placeholder="Co chcesz wiedzie&#263; o swojej firmie?"></textarea></div>
       </div>
       <button class="btn-main" id="nb-btn" onclick="analyzeNum('business')">&#9673; Oblicz numerologi&#281; firmy</button>
       <div class="result-box" id="nb-result"></div>
-      <div class="btn-row" id="nb-pdf-row" style="display:none;"><button class="btn-pdf" onclick="downloadPDF('num-business')">&#8659; Pobierz PDF &mdash; Numerologia Firmy</button></div>
+      <div class="btn-row" id="nb-pdf-row" style="display:none;"><button class="btn-pdf" onclick="downloadPDF('num-business')">&#8659; Pobierz PDF</button></div>
     </div>
   </div>
 
@@ -225,7 +241,7 @@ textarea{resize:vertical;min-height:52px;}
     <button class="btn-main" id="synth-btn" onclick="runSynthesis()">&#9672; Stw&#243;rz Syntez&#281;</button>
     <div class="result-box" id="synth-result"></div>
     <div id="synth-pdf-row" style="display:none;">
-      <div class="btn-row"><button class="btn-pdf" onclick="downloadPDF('synth')">&#8659; Pobierz PDF &mdash; Synteza</button></div>
+      <div class="btn-row"><button class="btn-pdf" onclick="downloadPDF('synth')">&#8659; Pobierz PDF - Synteza</button></div>
       <button class="btn-pdf-full" onclick="downloadPDF('full')">&#8659; Pobierz Pe&#322;ny Raport PDF</button>
     </div>
   </div>
@@ -233,8 +249,7 @@ textarea{resize:vertical;min-height:52px;}
 </main>
 </div>
 <script>
-var CLAUDE_KEY='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';
-
+var WORKER_URL='https://astrum-proxy.dutys100.workers.dev';
 var MAJOR=["0 G\u0142upiec","I Mag","II Najwy\u017csza Kap\u0142anka","III Cesarzowa","IV Cesarz","V Papie\u017c","VI Kochankowie","VII Rydwan","VIII Si\u0142a","IX Pustelnik","X Ko\u0142o Fortuny","XI Sprawiedliwo\u015b\u0107","XII Wieszak","XIII \u015amier\u0107","XIV Umiarkowanie","XV Diabe\u0142","XVI Wie\u017ca","XVII Gwiazda","XVIII Ksi\u0119\u017cyc","XIX S\u0142o\u0144ce","XX S\u0105d Ostateczny","XXI \u015awiat"];
 var SUITS={
   swords:["As Mieczy","2 Mieczy","3 Mieczy","4 Mieczy","5 Mieczy","6 Mieczy","7 Mieczy","8 Mieczy","9 Mieczy","10 Mieczy","Pa\u017c Mieczy","Rycerz Mieczy","Kr\u00f3lowa Mieczy","Kr\u00f3l Mieczy"],
@@ -243,23 +258,27 @@ var SUITS={
   pentacles:["As Pentakli","2 Pentakli","3 Pentakli","4 Pentakli","5 Pentakli","6 Pentakli","7 Pentakli","8 Pentakli","9 Pentakli","10 Pentakli","Pa\u017c Pentakli","Rycerz Pentakli","Kr\u00f3lowa Pentakli","Kr\u00f3l Pentakli"]
 };
 var SPREADS={
-  "1":{count:1,positions:["Przekaz / Odpowied\u017a"],desc:"Jedna karta \u2014 bezpo\u015bredni przekaz na dzi\u015b lub odpowied\u017a na pytanie."},
-  "3-past":{count:3,positions:["Przesz\u0142o\u015b\u0107","Tera\u017aniejszo\u015b\u0107","Przysz\u0142o\u015b\u0107"],desc:"Klasyczny uk\u0142ad trzech kart pokazuj\u0105cy przep\u0142yw energii w czasie."},
-  "3-mind":{count:3,positions:["Umys\u0142","Cia\u0142o","Duch"],desc:"Trzy wymiary istnienia \u2014 my\u015bl, fizyczno\u015b\u0107 i intuicja."},
-  "3-sit":{count:3,positions:["Sytuacja","Dzia\u0142anie / Rada","Wynik"],desc:"Praktyczny uk\u0142ad: jak jest, co zrobi\u0107 i dok\u0105d to prowadzi."},
-  "celtic":{count:10,positions:["Serce sprawy","Przeszkoda","Pod\u0142o\u017ce","Odleg\u0142a przesz\u0142o\u015b\u0107","Mo\u017cliwy wynik","Bliska przysz\u0142o\u015b\u0107","Twoja postawa","Wp\u0142yw zewn\u0119trzny","Nadzieje i l\u0119ki","Ostateczny wynik"],desc:"Celtycki Krzy\u017c \u2014 10 pozycji, pe\u0142ny wgl\u0105d w sytuacj\u0119."},
-  "horseshoe":{count:7,positions:["Przesz\u0142o\u015b\u0107","Tera\u017aniejszo\u015b\u0107","Ukryte wp\u0142ywy","Przeszkody","Otoczenie","Rada","Wynik"],desc:"Podkowa \u2014 7 kart, wszechstronny obraz sytuacji."},
-  "star":{count:6,positions:["Tera\u017aniejszo\u015b\u0107","Nadzieje i marzenia","L\u0119ki","Fundament","Co blokuje","Kierunek"],desc:"Gwiazda \u2014 6 kart skupionych na \u015bwiecie wewn\u0119trznym i kierunku."},
-  "relationship":{count:6,positions:["Ty","Druga osoba","Po\u0142\u0105czenie","Przesz\u0142o\u015b\u0107 relacji","Wyzwanie","Potencja\u0142"],desc:"Uk\u0142ad na relacj\u0119 \u2014 dynamika i potencja\u0142 mi\u0119dzy dwiema osobami."},
-  "decision":{count:5,positions:["Serce pytania","Opcja A","Opcja B","Co mo\u017cesz straci\u0107","Co mo\u017cesz zyska\u0107"],desc:"Rozstaj dr\u00f3g \u2014 5 kart pomagaj\u0105cych zobaczy\u0107 obie \u015bcie\u017cki jasno."},
-  "year":{count:12,positions:["Stycze\u0144","Luty","Marzec","Kwiecie\u0144","Maj","Czerwiec","Lipiec","Sierpie\u0144","Wrzesie\u0144","Pa\u017adziernik","Listopad","Grudzie\u0144"],desc:"Uk\u0142ad roczny \u2014 12 kart, po jednej na ka\u017cdy miesi\u0105c."}
+  "1":{count:1,positions:["Przekaz / Odpowied\u017a"],desc:"Jedna karta - bezpo\u015bredni przekaz."},
+  "3-past":{count:3,positions:["Przesz\u0142o\u015b\u0107","Tera\u017aniejszo\u015b\u0107","Przysz\u0142o\u015b\u0107"],desc:"Klasyczny uk\u0142ad trzech kart."},
+  "3-mind":{count:3,positions:["Umys\u0142","Cia\u0142o","Duch"],desc:"Trzy wymiary istnienia."},
+  "3-sit":{count:3,positions:["Sytuacja","Dzia\u0142anie","Wynik"],desc:"Praktyczny uk\u0142ad."},
+  "celtic":{count:10,positions:["Serce sprawy","Przeszkoda","Pod\u0142o\u017ce","Odleg\u0142a przesz\u0142o\u015b\u0107","Mo\u017cliwy wynik","Bliska przysz\u0142o\u015b\u0107","Twoja postawa","Wp\u0142yw zewn\u0119trzny","Nadzieje i l\u0119ki","Ostateczny wynik"],desc:"Celtycki Krzy\u017c - 10 pozycji."},
+  "horseshoe":{count:7,positions:["Przesz\u0142o\u015b\u0107","Tera\u017aniejszo\u015b\u0107","Ukryte wp\u0142ywy","Przeszkody","Otoczenie","Rada","Wynik"],desc:"Podkowa - 7 kart."},
+  "star":{count:6,positions:["Tera\u017aniejszo\u015b\u0107","Nadzieje","L\u0119ki","Fundament","Co blokuje","Kierunek"],desc:"Gwiazda - 6 kart."},
+  "relationship":{count:6,positions:["Ty","Druga osoba","Po\u0142\u0105czenie","Przesz\u0142o\u015b\u0107","Wyzwanie","Potencja\u0142"],desc:"Uk\u0142ad na relacj\u0119."},
+  "decision":{count:5,positions:["Serce pytania","Opcja A","Opcja B","Co stracisz","Co zyskasz"],desc:"Rozstaj dr\u00f3g - 5 kart."},
+  "year":{count:12,positions:["Stycze\u0144","Luty","Marzec","Kwiecie\u0144","Maj","Czerwiec","Lipiec","Sierpie\u0144","Wrzesie\u0144","Pa\u017adziernik","Listopad","Grudzie\u0144"],desc:"Uk\u0142ad roczny."}
 };
-
-var selectedCards={};
-var currentSpread="1";
+var selectedCards={};var currentSpread="1";
+var depthAstro='simple';var depthTarot='simple';var depthNum='simple';
 var savedAstro="",savedTarot="",savedNumPerson="",savedNumRelation="",savedNumBusiness="",savedSynth="";
 var savedAstroMeta={},savedTarotMeta={},savedNpMeta={},savedNrMeta={},savedNbMeta={};
 
+function setDepth(section,depth){
+  if(section==='astro'){depthAstro=depth;document.getElementById('astro-simple-btn').className='depth-btn'+(depth==='simple'?' active':'');document.getElementById('astro-deep-btn').className='depth-btn'+(depth==='deep'?' active':'');}
+  else if(section==='tarot'){depthTarot=depth;document.getElementById('tarot-simple-btn').className='depth-btn'+(depth==='simple'?' active':'');document.getElementById('tarot-deep-btn').className='depth-btn'+(depth==='deep'?' active':'');}
+  else if(section==='num'){depthNum=depth;document.getElementById('num-simple-btn').className='depth-btn'+(depth==='simple'?' active':'');document.getElementById('num-deep-btn').className='depth-btn'+(depth==='deep'?' active':'');}
+}
 function showSection(id,btn){
   if(id==='synth'&&document.getElementById('synth-nav').classList.contains('locked'))return;
   document.querySelectorAll('.section').forEach(function(s){s.classList.remove('active');});
@@ -277,24 +296,17 @@ function showInnerTab(id,btn){
 function buildGrid(gid,cards){
   var g=document.getElementById(gid);
   cards.forEach(function(name){
-    var c=document.createElement('div');
-    c.className='chip';c.textContent=name;c.dataset.card=name;
-    c.onclick=function(){toggleCard(name,c);};
-    g.appendChild(c);
+    var c=document.createElement('div');c.className='chip';c.textContent=name;c.dataset.card=name;
+    c.onclick=function(){toggleCard(name,c);};g.appendChild(c);
   });
 }
 buildGrid('major-grid',MAJOR);buildGrid('swords-grid',SUITS.swords);
 buildGrid('cups-grid',SUITS.cups);buildGrid('wands-grid',SUITS.wands);buildGrid('pentacles-grid',SUITS.pentacles);
-
 function toggleCard(name,chip){
-  var needed=SPREADS[currentSpread].count;
-  var rev=document.getElementById('rev-mode').checked;
-  if(selectedCards[name]===undefined){
-    if(Object.keys(selectedCards).length>=needed)return;
-    selectedCards[name]=false;chip.className='chip selected';
-  }else if(selectedCards[name]===false&&rev){
-    selectedCards[name]=true;chip.className='chip reversed';
-  }else{delete selectedCards[name];chip.className='chip';}
+  var needed=SPREADS[currentSpread].count;var rev=document.getElementById('rev-mode').checked;
+  if(selectedCards[name]===undefined){if(Object.keys(selectedCards).length>=needed)return;selectedCards[name]=false;chip.className='chip selected';}
+  else if(selectedCards[name]===false&&rev){selectedCards[name]=true;chip.className='chip reversed';}
+  else{delete selectedCards[name];chip.className='chip';}
   renderSelected();
 }
 function removeCard(name){
@@ -309,73 +321,58 @@ function renderSelected(){
   if(!names.length){list.innerHTML='<span style="font-size:0.83rem;color:var(--ink-soft);font-style:italic;">Kliknij karty poni\u017cej...</span>';return;}
   list.innerHTML=names.map(function(n,i){
     var pos=spread.positions[i]?'<small style="opacity:0.65;margin-right:3px;">'+spread.positions[i]+':</small>':'';
-    var rev=selectedCards[n]?' (\u2193)':'';
-    var cls=selectedCards[n]?' rev':'';
-    var safeName=n.replace(/&/g,'&amp;');
-    return '<span class="sel-tag'+cls+'">'+pos+n+rev+'<button onclick="removeCard(\''+safeName.replace(/'/g,"\\'")+'\')">\u00d7</button></span>';
+    var rev=selectedCards[n]?' (\u2193)':'';var cls=selectedCards[n]?' rev':'';
+    var safe=n.replace(/'/g,"\\'");
+    return '<span class="sel-tag'+cls+'">'+pos+n+rev+'<button onclick="removeCard(\''+safe+'\')">x</button></span>';
   }).join('');
 }
 function updateSpread(){
   currentSpread=document.getElementById('spread-select').value;
-  var s=SPREADS[currentSpread];
-  var selEl=document.getElementById('spread-select');
-  var nm=selEl.options[selEl.selectedIndex].text.split('\u2014')[0].trim();
-  document.getElementById('layout-info').innerHTML='<strong>'+nm+'</strong>'+s.positions.join(' \u00b7 ')+'<br><span style="opacity:0.8;font-size:0.85rem;">'+s.desc+'</span>';
+  var s=SPREADS[currentSpread];var selEl=document.getElementById('spread-select');
+  var nm=selEl.options[selEl.selectedIndex].text.split('-')[0].trim();
+  document.getElementById('layout-info').innerHTML='<strong>'+nm+'</strong> '+s.positions.join(' / ')+'<br><span style="opacity:0.8;font-size:0.85rem;">'+s.desc+'</span>';
   document.getElementById('need-count').textContent=s.count;
   selectedCards={};document.querySelectorAll('.chip').forEach(function(c){c.className='chip';});renderSelected();
 }
 updateSpread();
-
 function checkUnlock(){
   var has=savedAstro||savedTarot||savedNumPerson||savedNumRelation||savedNumBusiness;
-  var nav=document.getElementById('synth-nav');
-  var hint=document.getElementById('synth-hint');
+  var nav=document.getElementById('synth-nav');var hint=document.getElementById('synth-hint');
   if(has){nav.classList.remove('locked');nav.classList.add('unlocked');hint.style.display='none';}
   renderSynthCheckboxes();
 }
 function updateSynthStatus(){renderSynthCheckboxes();}
-
 var SYNTH_SOURCES=[
   {key:'astro',label:'Astrologia',getData:function(){return savedAstro;},title:'ANALIZA ASTROLOGICZNA'},
   {key:'tarot',label:'Tarot',getData:function(){return savedTarot;},title:'ODCZYT TAROTA'},
-  {key:'num-person',label:'Numerologia \u2014 Osoba',getData:function(){return savedNumPerson;},title:'NUMEROLOGIA OSOBY'},
-  {key:'num-relation',label:'Numerologia \u2014 Relacja',getData:function(){return savedNumRelation;},title:'NUMEROLOGIA RELACJI'},
-  {key:'num-business',label:'Numerologia \u2014 Firma',getData:function(){return savedNumBusiness;},title:'NUMEROLOGIA FIRMY'}
+  {key:'num-person',label:'Numerologia - Osoba',getData:function(){return savedNumPerson;},title:'NUMEROLOGIA OSOBY'},
+  {key:'num-relation',label:'Numerologia - Relacja',getData:function(){return savedNumRelation;},title:'NUMEROLOGIA RELACJI'},
+  {key:'num-business',label:'Numerologia - Firma',getData:function(){return savedNumBusiness;},title:'NUMEROLOGIA FIRMY'}
 ];
 function renderSynthCheckboxes(){
-  var box=document.getElementById('synth-checkboxes');if(!box)return;box.innerHTML='';
-  var any=false;
+  var box=document.getElementById('synth-checkboxes');if(!box)return;box.innerHTML='';var any=false;
   SYNTH_SOURCES.forEach(function(src){
     if(!src.getData())return;any=true;
     var row=document.createElement('label');
     row.style.cssText='display:flex;align-items:center;gap:8px;cursor:pointer;font-size:0.9rem;color:var(--ink-mid);';
-    row.innerHTML='<input type="checkbox" id="chk-'+src.key+'" checked style="width:auto;cursor:pointer;accent-color:var(--gold);"> '+src.label+' <span style="font-size:0.72rem;color:var(--gold);font-family:Cinzel,serif;">\u2014 gotowa</span>';
+    row.innerHTML='<input type="checkbox" id="chk-'+src.key+'" checked style="width:auto;cursor:pointer;accent-color:var(--gold);"> '+src.label+' <span style="font-size:0.72rem;color:var(--gold);font-family:Cinzel,serif;">- gotowa</span>';
     box.appendChild(row);
   });
   if(!any)box.innerHTML='<span style="font-size:0.85rem;color:var(--ink-soft);font-style:italic;">Wykonaj przynajmniej jedn\u0105 analiz\u0119.</span>';
   var btn=document.getElementById('synth-btn');if(btn)btn.disabled=!any;
 }
-
 async function callClaude(prompt,resultEl){
   resultEl.style.display='block';resultEl.className='result-box visible loading';
-  resultEl.textContent='❆ Odczytuję energie… proszę czekać…';
+  resultEl.textContent='Odczytuję energie... proszę czekać...';
   try{
-    var resp=await fetch('https://astrum-proxy.dutys100.workers.dev',{
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({model:'claude-haiku-4-5-20251001',max_tokens:2000,messages:[{role:'user',content:prompt}]})
-    });
+    var resp=await fetch(WORKER_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-haiku-4-5-20251001',max_tokens:2000,messages:[{role:'user',content:prompt}]})});
     var data=await resp.json();
-    if(data.error){resultEl.className='result-box visible';resultEl.textContent='Błąd API: '+data.error.message;return '';}
+    if(data.error){resultEl.className='result-box visible';resultEl.textContent='Blad API: '+data.error.message;return '';}
     resultEl.className='result-box visible';
-    var text=data.content&&data.content[0]?data.content[0].text:'Przepraszam, wystąpił błąd.';
+    var text=data.content&&data.content[0]?data.content[0].text:'Przepraszam, wystapil blad.';
     resultEl.textContent=text;return text;
-  }catch(e){
-    resultEl.className='result-box visible';
-    resultEl.textContent='Błąd połączenia: '+e.message;return '';
-  }
+  }catch(e){resultEl.className='result-box visible';resultEl.textContent='Blad polaczenia: '+e.message;return '';}
 }
-
 async function analyzeAstro(){
   var bd=document.getElementById('birthdate').value,bp=document.getElementById('birthplace').value;
   if(!bd||!bp){alert('Podaj dat\u0119 urodzenia i miejsce urodzenia.');return;}
@@ -383,262 +380,143 @@ async function analyzeAstro(){
     bt=document.getElementById('birthtime').value,focus=document.getElementById('focus').value,
     mood=document.getElementById('mood').value,extra=document.getElementById('extra').value;
   var btn=document.getElementById('astro-btn');btn.disabled=true;
-  savedAstroMeta={name:name,gender:gender,birthdate:bd,birthtime:bt,birthplace:bp,focus:focus,mood:mood};
-  var lines=[
-    'Jeste\u015b do\u015bwiadczon\u0105 astrologk\u0105 i poetk\u0105 duszy. Piszesz zawsze pi\u0119kn\u0105, p\u0142ynn\u0105 polszczyzn\u0105 \u2014 jak m\u0105dra przyjaci\u00f3\u0142ka pisz\u0105ca list do bliskiej osoby.',
-    'Piszesz ZAWSZE w drugiej osobie \u2014 bezpo\u015brednio do osoby, u\u017cywaj\u0105c "Ty", "Tw\u00f3j", "Jeste\u015b", "Czujesz".',
-    'Imi\u0119 osoby u\u017cyj TYLKO RAZ \u2014 na samym pocz\u0105tku pierwszego zdania jako ciep\u0142e powitanie ze zdrobnieniem. Potem ju\u017c NIGDY nie u\u017cywaj imienia.',
-    'Nigdy nie u\u017cywasz gwiazdek, hashtagów ani numerowanych list \u2014 tylko p\u0142ynna proza w akapitach.',
-    '',
-    'Osoba: '+(name||'(nie podano)')+', '+gender+', urodzona '+bd+(bt?' o godzinie '+bt:'')+' w '+bp+'.',
-    'Obszar zainteresowania: '+focus+'.',
-    mood?'Aktualny nastr\u00f3j: '+mood:'',
-    extra?'Pytanie: '+extra:'',
-    '',
-    'Napisz g\u0142\u0119bok\u0105, poetyck\u0105 analiz\u0119 astrologiczn\u0105. Ka\u017cd\u0105 cz\u0119\u015b\u0107 zaczynaj naturalnym nag\u0142\u00f3wkiem bez gwiazdek i numer\u00f3w.',
-    '',
-    'Znak S\u0142o\u0144ca \u2014 kim jeste\u015b w swojej istocie, jaka jest Twoja misja \u017cyciowa. Minimum 5 zda\u0144.',
-    'Znak Ksi\u0119\u017cyca \u2014 Tw\u00f3j \u015bwiat emocjonalny i intuicja. Minimum 5 zda\u0144.',
-    bt?'Ascendent \u2014 oblicz na podstawie godziny i miejsca urodzenia i opisz jak Ci\u0119 widz\u0105 inni. Minimum 4 zdania.':'Ascendent \u2014 wyja\u015bnij czym jest ascendent i dlaczego godzina urodzenia jest kluczem. Minimum 4 zdania.',
-    'Taniec planet \u2014 dominuj\u0105ce planety i ich wp\u0142yw. Minimum 4 zdania.',
-    'Dary i mocne strony \u2014 co wyj\u0105tkowego niesie ta konfiguracja. Minimum 4 zdania.',
-    'Przestrzenie wzrostu \u2014 z czu\u0142o\u015bci\u0105 opisz obszary do pracy. Minimum 4 zdania.',
-    'Energia tego czasu \u2014 co m\u00f3wi\u0105 gwiazdy teraz. Minimum 4 zdania.',
-    focus!=='Pe\u0142na analiza'?'Skupienie na obszarze: '+focus+' \u2014 napisz osobny akapit minimum 5 zda\u0144.':'',
-    '',
-    'Na ko\u0144cu jedno pi\u0119kne zdanie-mantra. Minimum 800 s\u0142\u00f3w.'
-  ];
-  var prompt=lines.filter(function(l){return l!==null&&l!==undefined&&l!=='';}).join('\n');
+  savedAstroMeta={name:name,gender:gender,birthdate:bd,birthtime:bt,birthplace:bp,focus:focus};
+  var isDeep=depthAstro==='deep';
+  var prompt;
+  if(isDeep){
+    prompt='Jestes doswiadczona astrologka i poetka duszy. Piszesz zawsze piekna, plynna polszczyzna jak madra przyjaciolka. Piszesz ZAWSZE w drugiej osobie (Ty, Twoj, Jestes). Imie osoby uzyj TYLKO RAZ na poczatku jako ciepłe powitanie. Nigdy nie uzywasz gwiazdek, hashtagow ani list - tylko plynna proza.\n\nOsoba: '+(name||'(nie podano)')+', '+gender+', urodzona '+bd+(bt?' o '+bt:'')+' w '+bp+'. Obszar: '+focus+'.'+(mood?'\nNastroj: '+mood:'')+(extra?'\nPytanie: '+extra:'')+'\n\nNapisz gleboka analize astrologiczna (800+ slow): Znak Slonca (5 zdan), Znak Ksiezyca (5 zdan), Ascendent (4 zdania), Planety (4 zdania), Mocne strony (4 zdania), Przestrzenie wzrostu (4 zdania), Energia czasu (4 zdania), skupienie na wybranym obszarze (5 zdan). Zakoncz zdaniem-mantra.';
+  }else{
+    prompt='Jestes astrologka. Pisz po polsku, cieplo, w drugiej osobie. Bez gwiazdek.\n\nOsoba: '+(name||'(nie podano)')+', '+gender+', urodzona '+bd+' w '+bp+'.\n\nNapisz KROTKA analize (200 slow): Znak Slonca (3-4 zdania), Znak Ksiezyca (2-3 zdania), glowna energia tej osoby (1 zdanie), zdanie-mantra.';
+  }
   var result=await callClaude(prompt,document.getElementById('astro-result'));
   if(result){savedAstro=result;document.getElementById('astro-pdf-row').style.display='flex';checkUnlock();}
   btn.disabled=false;
 }
-
 async function interpretTarot(){
   var spread=SPREADS[currentSpread];var names=Object.keys(selectedCards);
-  if(names.length<spread.count){alert('Wybierz jeszcze '+(spread.count-names.length)+' kart dla tego uk\u0142adu.');return;}
+  if(names.length<spread.count){alert('Wybierz jeszcze '+(spread.count-names.length)+' kart.');return;}
   var selEl=document.getElementById('spread-select');
   var spreadName=selEl.options[selEl.selectedIndex].text;
   var question=document.getElementById('tarot-question').value;
-  var cardsDesc=names.map(function(n,i){
-    return '- '+(spread.positions[i]||'Pozycja '+(i+1))+': '+n+(selectedCards[n]?' (ODWRÓCONA)':'');
-  }).join('\n');
+  var cardsDesc=names.map(function(n,i){return '- '+(spread.positions[i]||'Pozycja '+(i+1))+': '+n+(selectedCards[n]?' (ODWROCONA)':'');}).join('\n');
   savedTarotMeta={spreadName:spreadName,question:question,cards:names.map(function(n,i){return {pos:spread.positions[i]||'',name:n,rev:selectedCards[n]};})};
   var btn=document.getElementById('tarot-btn');btn.disabled=true;
-  var lines=[
-    'Jeste\u015b do\u015bwiadczon\u0105 tarocistrk\u0105 i przewodniczk\u0105 duchow\u0105. Piszesz zawsze pi\u0119kn\u0105, p\u0142ynn\u0105 polszczyzn\u0105 \u2014 jak m\u0105dra przyjaci\u00f3\u0142ka.',
-    'Piszesz ZAWSZE w drugiej osobie \u2014 u\u017cywaj\u0105c "Ty", "Tw\u00f3j", "Jeste\u015b". Imienia NIE u\u017cywaj lub u\u017cyj TYLKO raz na pocz\u0105tku.',
-    'Nigdy nie u\u017cywasz gwiazdek, hashtag\u00f3w ani numerowanych list.',
-    '',
-    'Uk\u0142ad: '+spreadName,
-    question?'Pytanie / intencja: '+question:'',
-    'Karty:',
-    cardsDesc,
-    '',
-    'Napisz g\u0142\u0119bok\u0105, poetyck\u0105 interpretacj\u0119 w pi\u0119knej polskiej prozie.',
-    'Og\u00f3lna energia uk\u0142adu \u2014 minimum 4 zdania.',
-    'Ka\u017cda karta w jej pozycji \u2014 minimum 4 zdania na kart\u0119.',
-    'Po\u0142\u0105czenia mi\u0119dzy kartami \u2014 minimum 4 zdania.',
-    'Przes\u0142anie i rada \u2014 minimum 4 zdania.',
-    'Na ko\u0144cu jedno zdanie-esencja. Minimum 800 s\u0142\u00f3w.'
-  ];
-  var prompt=lines.filter(function(l){return l!==null&&l!==undefined&&l!=='';}).join('\n');
+  var isTarotDeep=depthTarot==='deep';
+  var prompt;
+  if(isTarotDeep){
+    prompt='Jestes tarocistrka. Piszesz piekna polska proza, w drugiej osobie. Bez gwiazdek i list.\n\nUklad: '+spreadName+(question?'\nPytanie: '+question:'')+'\nKarty:\n'+cardsDesc+'\n\nNapisz gleboka interpretacje (800+ slow): energia ukladu (4 zdania), kazda karta w pozycji (4 zdania/karte), polaczenia miedzy kartami (4 zdania), przeslanie i rada (4 zdania), zdanie-esencja.';
+  }else{
+    prompt='Jestes tarocistrka. Pisz po polsku, cieplo, w drugiej osobie. Bez gwiazdek.\n\nUklad: '+spreadName+(question?'\nPytanie: '+question:'')+'\nKarty:\n'+cardsDesc+'\n\nNapisz KROTKA interpretacje (200 slow): 1 zdanie o energii ukladu, dla kazdej karty 1 zdanie z kluczowym przekazem, 1 zdanie z glowna rada, zdanie-esencja.';
+  }
   var result=await callClaude(prompt,document.getElementById('tarot-result'));
   if(result){savedTarot=result;document.getElementById('tarot-pdf-row').style.display='flex';checkUnlock();}
   btn.disabled=false;
 }
-
 function reduceNum(n,keepMaster){if(keepMaster===undefined)keepMaster=true;while(n>9){if(keepMaster&&(n===11||n===22||n===33))break;var s=0;String(n).split('').forEach(function(d){s+=parseInt(d);});n=s;}return n;}
 function calcLifeNumber(dateStr){var digits=dateStr.replace(/\D/g,'');var sum=0;digits.split('').forEach(function(d){sum+=parseInt(d);});return reduceNum(sum);}
-function calcDestinyNumber(fullName){var map={a:1,b:2,c:3,d:4,e:5,f:6,g:7,h:8,i:9,j:1,k:2,l:3,m:4,n:5,o:6,p:7,q:8,r:9,s:1,t:2,u:3,v:4,w:5,x:6,y:7,z:8,'\u0105':1,'\u0107':3,'\u0119':5,'\u0142':3,'\u0144':5,'\u00f3':6,'\u015b':1,'\u017a':8,'\u017c':8};var sum=0;fullName.toLowerCase().replace(/\s/g,'').split('').forEach(function(c){sum+=(map[c]||0);});return reduceNum(sum);}
-function calcSoulNumber(fullName){var vowels='\u0061\u0065\u0069\u006f\u0075\u0105\u0119\u00f3\u0079';var map={a:1,e:5,i:9,o:6,u:3,'\u0105':1,'\u0119':5,'\u00f3':6,y:7};var sum=0;fullName.toLowerCase().split('').forEach(function(c){if(vowels.indexOf(c)>=0)sum+=(map[c]||0);});return reduceNum(sum);}
-function calcPersonalityNumber(fullName){var vowels='aeiou\u0105\u0119\u00f3y ';var map={b:2,c:3,d:4,f:6,g:7,h:8,j:1,k:2,l:3,m:4,n:5,p:7,q:8,r:9,s:1,t:2,v:4,w:5,x:6,z:8,'\u0107':3,'\u0142':3,'\u0144':5,'\u015b':1,'\u017a':8,'\u017c':8};var sum=0;fullName.toLowerCase().split('').forEach(function(c){if(vowels.indexOf(c)<0)sum+=(map[c]||0);});return reduceNum(sum);}
+function calcDestinyNumber(fullName){var map={a:1,b:2,c:3,d:4,e:5,f:6,g:7,h:8,i:9,j:1,k:2,l:3,m:4,n:5,o:6,p:7,q:8,r:9,s:1,t:2,u:3,v:4,w:5,x:6,y:7,z:8};var sum=0;fullName.toLowerCase().replace(/\s/g,'').split('').forEach(function(c){sum+=(map[c]||0);});return reduceNum(sum);}
+function calcSoulNumber(fullName){var vowels='aeiouy';var map={a:1,e:5,i:9,o:6,u:3,y:7};var sum=0;fullName.toLowerCase().split('').forEach(function(c){if(vowels.indexOf(c)>=0)sum+=(map[c]||0);});return reduceNum(sum);}
+function calcPersonalityNumber(fullName){var vowels='aeiouy ';var map={b:2,c:3,d:4,f:6,g:7,h:8,j:1,k:2,l:3,m:4,n:5,p:7,q:8,r:9,s:1,t:2,v:4,w:5,x:6,z:8};var sum=0;fullName.toLowerCase().split('').forEach(function(c){if(vowels.indexOf(c)<0)sum+=(map[c]||0);});return reduceNum(sum);}
 function calcBirthdayNumber(dateStr){return reduceNum(parseInt(dateStr.split('-')[2]));}
 function calcPersonalYear(dateStr,year){var parts=dateStr.split('-');var m=parseInt(parts[1]),d=parseInt(parts[2]);var sum=0;String(d).split('').forEach(function(x){sum+=parseInt(x);});String(m).split('').forEach(function(x){sum+=parseInt(x);});String(year).split('').forEach(function(x){sum+=parseInt(x);});return reduceNum(sum);}
-function masterLabel(n){return(n===11||n===22||n===33)?n+'/'+reduceNum(n,false)+' (liczba mistrzowska)':String(n);}
+function masterLabel(n){return(n===11||n===22||n===33)?n+'/'+(n===11?2:n===22?4:6)+' (liczba mistrzowska)':String(n);}
 function calcAllNumbers(fullName,dateStr){
   var year=new Date().getFullYear();
   var life=calcLifeNumber(dateStr),destiny=calcDestinyNumber(fullName),soul=calcSoulNumber(fullName),personality=calcPersonalityNumber(fullName),birthday=calcBirthdayNumber(dateStr),personalYear=calcPersonalYear(dateStr,year);
   return{life:life,destiny:destiny,soul:soul,personality:personality,birthday:birthday,personalYear:personalYear,labels:{life:masterLabel(life),destiny:masterLabel(destiny),soul:masterLabel(soul),personality:masterLabel(personality),birthday:masterLabel(birthday),personalYear:masterLabel(personalYear)}};
 }
-
 async function analyzeNum(type){
   var prompt='',resultEl,btnEl,pdfRowEl;
   if(type==='person'){
     var fn=document.getElementById('np-fullname').value,bd=document.getElementById('np-birthdate').value;
-    if(!fn||!bd){alert('Podaj imi\u0119, nazwisko i dat\u0119 urodzenia.');return;}
+    if(!fn||!bd){alert('Podaj imie, nazwisko i date urodzenia.');return;}
     var focus=document.getElementById('np-focus').value,extra=document.getElementById('np-extra').value;
     savedNpMeta={fullname:fn,birthdate:bd,focus:focus};
     var nums=calcAllNumbers(fn,bd);
-    var lines=[
-      'Jeste\u015b do\u015bwiadczon\u0105 numerolo\u017ck\u0105 i poetk\u0105 duszy. Piszesz zawsze pi\u0119kn\u0105, p\u0142ynn\u0105 polszczyzn\u0105.',
-      'Piszesz w drugiej osobie (Ty, Tw\u00f3j, Jeste\u015b). Imi\u0119 u\u017cyj tylko raz na pocz\u0105tku jako ciep\u0142e powitanie ze zdrobnieniem.',
-      'Nigdy nie u\u017cywasz gwiazdek, hashtag\u00f3w ani list. Daty zapisuj cyframi, nigdy s\u0142ownie.',
-      '',
-      'Osoba: '+fn+', urodzona '+bd+'. Obszar: '+focus+'.',
-      extra?'Pytanie: '+extra:'',
-      '',
-      'Liczby obliczone \u2014 u\u017cyj DOK\u0141ADNIE tych warto\u015bci:',
-      'Liczba \u017bycia: '+nums.labels.life,
-      'Liczba Przeznaczenia: '+nums.labels.destiny,
-      'Liczba Duszy: '+nums.labels.soul,
-      'Liczba Osobowo\u015bci: '+nums.labels.personality,
-      'Liczba Urodzin: '+nums.labels.birthday,
-      'Rok Osobisty '+new Date().getFullYear()+': '+nums.labels.personalYear,
-      '',
-      'Napisz g\u0142\u0119bok\u0105 poetyck\u0105 analiz\u0119. Ka\u017cda liczba \u2014 minimum 4 zdania. Na ko\u0144cu zdanie-mantra. Minimum 700 s\u0142\u00f3w.'
-    ];
-    prompt=lines.filter(function(l){return l!='';}).join('\n');
+    var isNumDeep=depthNum==='deep';
+    if(isNumDeep){
+      prompt='Jestes numerolozka i poetka duszy. Piszesz piekna polska proza, w drugiej osobie. Imie uzyj tylko raz na poczatku. Bez gwiazdek. Daty cyframi.\n\nOsoba: '+fn+', ur. '+bd+'. Obszar: '+focus+'.'+(extra?'\nPytanie: '+extra:'')+'\n\nLiczby - uzyj DOKLADNIE tych wartosci:\nLiczba Zycia: '+nums.labels.life+'\nLiczba Przeznaczenia: '+nums.labels.destiny+'\nLiczba Duszy: '+nums.labels.soul+'\nLiczba Osobowosci: '+nums.labels.personality+'\nLiczba Urodzin: '+nums.labels.birthday+'\nRok Osobisty '+new Date().getFullYear()+': '+nums.labels.personalYear+'\n\nNapisz gleboka analize (700+ slow). Kazda liczba - minimum 4 zdania. Zakoncz zdaniem-mantra.';
+    }else{
+      prompt='Jestes numerolozka. Pisz po polsku, cieplo, w drugiej osobie. Bez gwiazdek. Daty cyframi.\n\nOsoba: '+fn+', ur. '+bd+'.\nLiczba Zycia: '+nums.labels.life+', Przeznaczenia: '+nums.labels.destiny+', Rok '+new Date().getFullYear()+': '+nums.labels.personalYear+'\n\nNapisz KROTKA analize (200 slow): Liczba Zycia '+nums.labels.life+' (3-4 zdania), Przeznaczenia '+nums.labels.destiny+' (2-3 zdania), Rok osobisty (2 zdania), zdanie-mantra.';
+    }
     resultEl=document.getElementById('np-result');btnEl=document.getElementById('np-btn');pdfRowEl=document.getElementById('np-pdf-row');
   }else if(type==='relation'){
     var n1=document.getElementById('nr-name1').value,b1=document.getElementById('nr-birth1').value,
       n2=document.getElementById('nr-name2').value,b2=document.getElementById('nr-birth2').value;
-    if(!n1||!b1||!n2||!b2){alert('Podaj dane obu os\u00f3b.');return;}
+    if(!n1||!b1||!n2||!b2){alert('Podaj dane obu osob.');return;}
     var rtype=document.getElementById('nr-type').value,extra2=document.getElementById('nr-extra').value;
     savedNrMeta={name1:n1,birth1:b1,name2:n2,birth2:b2,rtype:rtype};
     var nums1=calcAllNumbers(n1,b1),nums2=calcAllNumbers(n2,b2);
-    var lines2=[
-      'Jeste\u015b do\u015bwiadczon\u0105 numerolo\u017ck\u0105. Piszesz pi\u0119kn\u0105 polszczyzn\u0105 w drugiej osobie. Bez gwiazdek i list.',
-      '',
-      n1+' (ur. '+b1+'): Liczba \u017bycia '+nums1.labels.life+', Przeznaczenia '+nums1.labels.destiny+', Duszy '+nums1.labels.soul,
-      n2+' (ur. '+b2+'): Liczba \u017bycia '+nums2.labels.life+', Przeznaczenia '+nums2.labels.destiny+', Duszy '+nums2.labels.soul,
-      'Charakter relacji: '+rtype,
-      extra2?'Pytanie: '+extra2:'',
-      '',
-      'Napisz g\u0142\u0119bok\u0105 analiz\u0119 kompatybilno\u015bci. Minimum 600 s\u0142\u00f3w. Na ko\u0144cu zdanie-esencja.'
-    ];
-    prompt=lines2.filter(function(l){return l!='';}).join('\n');
+    prompt='Jestes numerolozka. Piszesz piekna polska proza w drugiej osobie. Bez gwiazdek.\n\n'+n1+' (ur. '+b1+'): Liczba Zycia '+nums1.labels.life+', Przeznaczenia '+nums1.labels.destiny+', Duszy '+nums1.labels.soul+'\n'+n2+' (ur. '+b2+'): Liczba Zycia '+nums2.labels.life+', Przeznaczenia '+nums2.labels.destiny+', Duszy '+nums2.labels.soul+'\nCharakter relacji: '+rtype+(extra2?'\nPytanie: '+extra2:'')+'\n\nNapisz gleboka analize kompatybilnosci (600+ slow). Na koncu zdanie-esencja.';
     resultEl=document.getElementById('nr-result');btnEl=document.getElementById('nr-btn');pdfRowEl=document.getElementById('nr-pdf-row');
   }else if(type==='business'){
     var bname=document.getElementById('nb-name').value;
-    if(!bname){alert('Podaj nazw\u0119 firmy lub projektu.');return;}
+    if(!bname){alert('Podaj nazwe firmy.');return;}
     var bdate=document.getElementById('nb-date').value,industry=document.getElementById('nb-industry').value,
       owner=document.getElementById('nb-owner').value,bfocus=document.getElementById('nb-focus').value,bextra=document.getElementById('nb-extra').value;
     savedNbMeta={name:bname,date:bdate,industry:industry,owner:owner,focus:bfocus};
-    var lines3=['Jeste\u015b ekspertk\u0105 numerologii biznesowej. Piszesz pi\u0119kn\u0105 polszczyzn\u0105. Bez gwiazdek i list.','','Firma: '+bname];
-    if(bdate)lines3.push('Data za\u0142o\u017cenia: '+bdate);
-    if(industry)lines3.push('Bran\u017ca: '+industry);
-    if(owner)lines3.push('W\u0142a\u015bciciel: '+owner);
-    lines3.push('Obszar: '+bfocus);
-    if(bextra)lines3.push('Pytanie: '+bextra);
-    lines3.push('','Oblicz liczb\u0119 nazwy firmy i daty za\u0142o\u017cenia. Napisz g\u0142\u0119bok\u0105 analiz\u0119 numerologiczn\u0105 biznesu. Minimum 500 s\u0142\u00f3w.');
-    prompt=lines3.join('\n');
+    var p3=['Jestes ekspertka numerologii biznesowej. Piszesz piekna polska proza. Bez gwiazdek.','','Firma: '+bname];
+    if(bdate)p3.push('Data zalozenia: '+bdate);if(industry)p3.push('Branza: '+industry);if(owner)p3.push('Wlasciciel: '+owner);
+    p3.push('Obszar: '+bfocus);if(bextra)p3.push('Pytanie: '+bextra);
+    p3.push('','Oblicz liczbe nazwy firmy i daty zalozenia. Napisz gleboka analize numerologiczna biznesu (500+ slow).');
+    prompt=p3.join('\n');
     resultEl=document.getElementById('nb-result');btnEl=document.getElementById('nb-btn');pdfRowEl=document.getElementById('nb-pdf-row');
   }
   btnEl.disabled=true;
   var result=await callClaude(prompt,resultEl);
-  if(result){
-    if(type==='person')savedNumPerson=result;
-    else if(type==='relation')savedNumRelation=result;
-    else if(type==='business')savedNumBusiness=result;
-    pdfRowEl.style.display='flex';checkUnlock();
-  }
+  if(result){if(type==='person')savedNumPerson=result;else if(type==='relation')savedNumRelation=result;else if(type==='business')savedNumBusiness=result;pdfRowEl.style.display='flex';checkUnlock();}
   btnEl.disabled=false;
 }
-
 async function runSynthesis(){
   var parts=[];
-  SYNTH_SOURCES.forEach(function(src){
-    var chk=document.getElementById('chk-'+src.key);
-    if(chk&&chk.checked&&src.getData())parts.push(src.title+':\n'+src.getData());
-  });
-  if(!parts.length){alert('Zaznacz co najmniej jedn\u0105 analiz\u0119.');return;}
+  SYNTH_SOURCES.forEach(function(src){var chk=document.getElementById('chk-'+src.key);if(chk&&chk.checked&&src.getData())parts.push(src.title+':\n'+src.getData());});
+  if(!parts.length){alert('Zaznacz co najmniej jedna analize.');return;}
   var btn=document.getElementById('synth-btn');btn.disabled=true;
   var joined=parts.join('\n\n---\n\n');
-  var lines=[
-    'Jeste\u015b m\u0105dr\u0105 przewodniczk\u0105 duchow\u0105. Piszesz zawsze po polsku.',
-    'Piszesz w drugiej osobie (Ty, Tw\u00f3j). Imienia NIE u\u017cywaj lub u\u017cyj TYLKO raz.',
-    'Nigdy nie u\u017cywasz gwiazdek, hashtag\u00f3w ani list.',
-    '',
-    'Masz analizy:',
-    '',
-    joined,
-    '',
-    'Napisz SYNTEZ\u0118 \u2014 sp\u00f3jn\u0105, g\u0142\u0119bok\u0105 interpretacj\u0119 kt\u00f3ra znajdzie wsp\u00f3lne motywy, opi\u015be g\u0142\u00f3wny temat \u017cyciowy, da konkretn\u0105 rad\u0119 i zako\u0144czy zdaniem-mantr\u0105. Minimum 500 s\u0142\u00f3w.'
-  ];
-  var prompt=lines.join('\n');
+  var prompt='Jestes madra przewodniczka duchowa. Piszesz zawsze po polsku, w drugiej osobie (Ty, Twoj). Bez gwiazdek i list.\n\nMasz analizy:\n\n'+joined+'\n\nNapisz SYNTEZE - spojny, glęboki tekst ktory znajdzie wspolne motywy, opisze glowny temat zyciowy, da konkretna rade i zakonczy zdaniem-mantra. Minimum 500 slow.';
   var result=await callClaude(prompt,document.getElementById('synth-result'));
   if(result){savedSynth=result;document.getElementById('synth-pdf-row').style.display='block';}
   btn.disabled=false;
 }
-
 function clearSection(section){
-  function resetResult(id,pdfRowId){
-    var r=document.getElementById(id);if(r){r.textContent='';r.className='result-box';r.style.display='none';}
-    if(pdfRowId){var p=document.getElementById(pdfRowId);if(p)p.style.display='none';}
-  }
-  if(section==='astro'){
-    ['name','birthplace','extra'].forEach(function(id){var el=document.getElementById(id);if(el)el.value='';});
-    ['birthdate','birthtime'].forEach(function(id){var el=document.getElementById(id);if(el)el.value='';});
-    ['gender','focus','mood'].forEach(function(id){var el=document.getElementById(id);if(el)el.selectedIndex=0;});
-    resetResult('astro-result','astro-pdf-row');savedAstro='';savedAstroMeta={};
-  }else if(section==='tarot'){
-    var tq=document.getElementById('tarot-question');if(tq)tq.value='';
-    var ss=document.getElementById('spread-select');if(ss)ss.selectedIndex=0;
-    var rm=document.getElementById('rev-mode');if(rm)rm.checked=false;
-    selectedCards={};document.querySelectorAll('.chip').forEach(function(c){c.className='chip';});
-    updateSpread();resetResult('tarot-result','tarot-pdf-row');savedTarot='';savedTarotMeta={};
-  }else if(section==='num'){
-    var active=document.querySelector('.inner-panel.active');if(!active)return;
-    active.querySelectorAll('input[type="text"],input[type="date"],textarea').forEach(function(el){el.value='';});
-    active.querySelectorAll('select').forEach(function(el){el.selectedIndex=0;});
-    if(active.id==='num-person'){resetResult('np-result','np-pdf-row');savedNumPerson='';savedNpMeta={};}
-    else if(active.id==='num-relation'){resetResult('nr-result','nr-pdf-row');savedNumRelation='';savedNrMeta={};}
-    else if(active.id==='num-business'){resetResult('nb-result','nb-pdf-row');savedNumBusiness='';savedNbMeta={};}
-  }else if(section==='synth'){
-    resetResult('synth-result',null);
-    var sp=document.getElementById('synth-pdf-row');if(sp)sp.style.display='none';savedSynth='';
-  }
+  function resetResult(id,pdfRowId){var r=document.getElementById(id);if(r){r.textContent='';r.className='result-box';r.style.display='none';}if(pdfRowId){var p=document.getElementById(pdfRowId);if(p)p.style.display='none';}}
+  if(section==='astro'){['name','birthplace','extra'].forEach(function(id){var el=document.getElementById(id);if(el)el.value='';});['birthdate','birthtime'].forEach(function(id){var el=document.getElementById(id);if(el)el.value='';});['gender','focus','mood'].forEach(function(id){var el=document.getElementById(id);if(el)el.selectedIndex=0;});resetResult('astro-result','astro-pdf-row');savedAstro='';savedAstroMeta={};}
+  else if(section==='tarot'){var tq=document.getElementById('tarot-question');if(tq)tq.value='';var ss=document.getElementById('spread-select');if(ss)ss.selectedIndex=0;var rm=document.getElementById('rev-mode');if(rm)rm.checked=false;selectedCards={};document.querySelectorAll('.chip').forEach(function(c){c.className='chip';});updateSpread();resetResult('tarot-result','tarot-pdf-row');savedTarot='';savedTarotMeta={};}
+  else if(section==='num'){var active=document.querySelector('.inner-panel.active');if(!active)return;active.querySelectorAll('input[type="text"],input[type="date"],textarea').forEach(function(el){el.value='';});active.querySelectorAll('select').forEach(function(el){el.selectedIndex=0;});if(active.id==='num-person'){resetResult('np-result','np-pdf-row');savedNumPerson='';savedNpMeta={};}else if(active.id==='num-relation'){resetResult('nr-result','nr-pdf-row');savedNumRelation='';savedNrMeta={};}else if(active.id==='num-business'){resetResult('nb-result','nb-pdf-row');savedNumBusiness='';savedNbMeta={};}}
+  else if(section==='synth'){resetResult('synth-result',null);var sp=document.getElementById('synth-pdf-row');if(sp)sp.style.display='none';savedSynth='';}
   checkUnlock();renderSynthCheckboxes();
 }
-
 function buildPrintHTML(title,subtitle,metaLines,bodyText){
   var today=new Date().toLocaleDateString('pl-PL',{day:'2-digit',month:'long',year:'numeric'});
   var metaRows=metaLines.filter(Boolean).map(function(l){return '<div class="meta-row">'+l+'</div>';}).join('');
   var cleaned=bodyText.replace(/\*\*/g,'').replace(/\*/g,'').replace(/#{1,3} /g,'');
-  return '<!DOCTYPE html><html lang="pl"><head><meta charset="UTF-8"><link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;1,400&family=Cinzel:wght@400;500&display=swap" rel="stylesheet"><style>*{box-sizing:border-box;margin:0;padding:0}body{font-family:"EB Garamond",Georgia,serif;color:#2a2018;background:#fff;padding:0;}.page{max-width:720px;margin:0 auto;padding:40px 50px;}.header{display:flex;justify-content:space-between;align-items:center;padding-bottom:12px;border-bottom:2px solid #b8902a;margin-bottom:28px;}.header-brand{font-family:"Cinzel",serif;font-size:13px;color:#8a7a62;letter-spacing:0.1em;}h1{font-family:"Cinzel",serif;font-size:28px;font-weight:400;text-align:center;color:#2a2018;margin-bottom:6px;}.subtitle{text-align:center;font-style:italic;color:#8a7a62;font-size:15px;margin-bottom:28px;}.meta-box{background:#fdf9f2;border:1px solid #e8d5a0;border-radius:4px;padding:14px 18px;margin-bottom:28px;}.meta-row{font-size:14px;color:#5a4a32;padding:3px 0;}.body-text{font-size:16px;line-height:1.9;color:#2a2018;white-space:pre-wrap;}.footer{margin-top:40px;padding-top:14px;border-top:1px solid #e8d5a0;text-align:center;font-size:11px;color:#8a7a62;font-family:"Cinzel",serif;}.no-print{position:fixed;bottom:20px;right:20px;display:flex;gap:8px;}@media print{.no-print{display:none!important;}@page{margin:15mm;}}</style></head><body><div class="page"><div class="header"><span class="header-brand">Astrum &amp; Arcana</span><span class="header-brand">'+today+'</span></div><h1>'+title+'</h1><div class="subtitle">'+subtitle+'</div>'+(metaRows?'<div class="meta-box">'+metaRows+'</div>':'')+'<div class="body-text">'+cleaned+'</div><div class="footer">Astrum &amp; Arcana &nbsp;&middot;&nbsp; '+today+'</div></div><div class="no-print"><button onclick="window.print()" style="font-family:\'Cinzel\',serif;font-size:13px;background:#b8902a;color:#fff;border:none;padding:10px 22px;border-radius:4px;cursor:pointer;">Drukuj / Zapisz PDF</button><button onclick="window.close()" style="font-family:\'Cinzel\',serif;font-size:13px;background:transparent;color:#8a7a62;border:1px solid #e8d5a0;padding:10px 16px;border-radius:4px;cursor:pointer;">Zamknij</button></div></body></html>';
+  return '<!DOCTYPE html><html lang="pl"><head><meta charset="UTF-8"><link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;1,400&family=Cinzel:wght@400;500&display=swap" rel="stylesheet"><style>*{box-sizing:border-box;margin:0;padding:0}body{font-family:"EB Garamond",Georgia,serif;color:#2a2018;background:#fff;}.page{max-width:720px;margin:0 auto;padding:40px 50px;}.header{display:flex;justify-content:space-between;align-items:center;padding-bottom:12px;border-bottom:2px solid #b8902a;margin-bottom:28px;}.header-brand{font-family:"Cinzel",serif;font-size:13px;color:#8a7a62;}h1{font-family:"Cinzel",serif;font-size:28px;font-weight:400;text-align:center;color:#2a2018;margin-bottom:6px;}.subtitle{text-align:center;font-style:italic;color:#8a7a62;font-size:15px;margin-bottom:28px;}.meta-box{background:#fdf9f2;border:1px solid #e8d5a0;border-radius:4px;padding:14px 18px;margin-bottom:28px;}.meta-row{font-size:14px;color:#5a4a32;padding:3px 0;}.body-text{font-size:16px;line-height:1.9;color:#2a2018;white-space:pre-wrap;}.footer{margin-top:40px;padding-top:14px;border-top:1px solid #e8d5a0;text-align:center;font-size:11px;color:#8a7a62;font-family:"Cinzel",serif;}.no-print{position:fixed;bottom:20px;right:20px;display:flex;gap:8px;}@media print{.no-print{display:none!important;}@page{margin:15mm;}}</style></head><body><div class="page"><div class="header"><span class="header-brand">Astrum &amp; Arcana</span><span class="header-brand">'+today+'</span></div><h1>'+title+'</h1><div class="subtitle">'+subtitle+'</div>'+(metaRows?'<div class="meta-box">'+metaRows+'</div>':'')+'<div class="body-text">'+cleaned+'</div><div class="footer">Astrum &amp; Arcana &nbsp;&middot;&nbsp; '+today+'</div></div><div class="no-print"><button onclick="window.print()" style="font-family:Cinzel,serif;font-size:13px;background:#b8902a;color:#fff;border:none;padding:10px 22px;border-radius:4px;cursor:pointer;">Drukuj / Zapisz PDF</button><button onclick="window.close()" style="font-family:Cinzel,serif;font-size:13px;background:transparent;color:#8a7a62;border:1px solid #e8d5a0;padding:10px 16px;border-radius:4px;cursor:pointer;margin-left:8px;">Zamknij</button></div></body></html>';
 }
 function openPrintWindow(html){var w=window.open('','_blank','width=800,height=900');w.document.write(html);w.document.close();}
-
 function downloadPDF(type){
   var today=new Date().toLocaleDateString('pl-PL',{day:'2-digit',month:'long',year:'numeric'});
-  if(type==='astro'){
-    var m=savedAstroMeta;var meta=[m.name?'Imi\u0119: '+m.name:'','Data: '+m.birthdate+(m.birthtime?' \u00b7 '+m.birthtime:''),'Miejsce: '+m.birthplace+' \u00b7 P\u0142e\u0107: '+m.gender,'Obszar: '+m.focus];
-    openPrintWindow(buildPrintHTML('Analiza Astrologiczna','Raport osobisty',meta,savedAstro));
-  }else if(type==='tarot'){
-    var m2=savedTarotMeta;var meta2=['Uk\u0142ad: '+m2.spreadName,m2.question?'Pytanie: '+m2.question:'','Karty: '+m2.cards.map(function(c){return c.pos+': '+c.name+(c.rev?' (odwr.)':'');}).join(' \u00b7 ')];
-    openPrintWindow(buildPrintHTML('Odczyt Tarota','Interpretacja uk\u0142adu kart',meta2,savedTarot));
-  }else if(type==='num-person'){
-    var m3=savedNpMeta;openPrintWindow(buildPrintHTML('Numerologia \u2014 Osoba','Pe\u0142na analiza',['Imi\u0119: '+m3.fullname,'Data: '+m3.birthdate,'Obszar: '+m3.focus],savedNumPerson));
-  }else if(type==='num-relation'){
-    var m4=savedNrMeta;openPrintWindow(buildPrintHTML('Numerologia \u2014 Relacja','Kompatybilno\u015b\u0107',['Osoba 1: '+m4.name1+' (ur. '+m4.birth1+')','Osoba 2: '+m4.name2+' (ur. '+m4.birth2+')','Relacja: '+m4.rtype],savedNumRelation));
-  }else if(type==='num-business'){
-    var m5=savedNbMeta;var meta5=['Firma: '+m5.name];if(m5.date)meta5.push('Data: '+m5.date);if(m5.industry)meta5.push('Bran\u017ca: '+m5.industry);
-    openPrintWindow(buildPrintHTML('Numerologia \u2014 Firma','Analiza biznesowa',meta5,savedNumBusiness));
-  }else if(type==='synth'){
-    openPrintWindow(buildPrintHTML('Synteza','Po\u0142\u0105czenie analiz',[],savedSynth));
-  }else if(type==='full'){
+  if(type==='astro'){var m=savedAstroMeta;openPrintWindow(buildPrintHTML('Analiza Astrologiczna','Raport osobisty',[m.name?'Imie: '+m.name:'','Data: '+m.birthdate+(m.birthtime?' / '+m.birthtime:''),'Miejsce: '+m.birthplace,'Obszar: '+m.focus],savedAstro));}
+  else if(type==='tarot'){var m2=savedTarotMeta;openPrintWindow(buildPrintHTML('Odczyt Tarota','Interpretacja',[m2.spreadName,m2.question?'Pytanie: '+m2.question:''],savedTarot));}
+  else if(type==='num-person'){var m3=savedNpMeta;openPrintWindow(buildPrintHTML('Numerologia - Osoba','Pelna analiza',['Imie: '+m3.fullname,'Data: '+m3.birthdate,'Obszar: '+m3.focus],savedNumPerson));}
+  else if(type==='num-relation'){var m4=savedNrMeta;openPrintWindow(buildPrintHTML('Numerologia - Relacja','Kompatybilnosc',['Osoba 1: '+m4.name1+' (ur. '+m4.birth1+')','Osoba 2: '+m4.name2+' (ur. '+m4.birth2+')','Relacja: '+m4.rtype],savedNumRelation));}
+  else if(type==='num-business'){var m5=savedNbMeta;var meta5=['Firma: '+m5.name];if(m5.date)meta5.push('Data: '+m5.date);if(m5.industry)meta5.push('Branza: '+m5.industry);openPrintWindow(buildPrintHTML('Numerologia - Firma','Analiza biznesowa',meta5,savedNumBusiness));}
+  else if(type==='synth'){openPrintWindow(buildPrintHTML('Synteza','Polaczenie analiz',[],savedSynth));}
+  else if(type==='full'){
     var parts=[];if(savedAstro)parts.push('Astrologia');if(savedTarot)parts.push('Tarot');if(savedNumPerson)parts.push('Numerologia Osoby');if(savedNumRelation)parts.push('Numerologia Relacji');if(savedNumBusiness)parts.push('Numerologia Firmy');if(savedSynth)parts.push('Synteza');
-    var ma=savedAstroMeta;
-    var sections=[];
-    if(savedAstro)sections.push({title:'Analiza Astrologiczna',sub:'Cz\u0119\u015b\u0107 I',meta:[ma.name?'Imi\u0119: '+ma.name:'','Data: '+ma.birthdate+(ma.birthtime?' \u00b7 '+ma.birthtime:''),'Miejsce: '+ma.birthplace].filter(Boolean),text:savedAstro});
-    if(savedTarot){var mt=savedTarotMeta;sections.push({title:'Odczyt Tarota',sub:'Cz\u0119\u015b\u0107 II',meta:['Uk\u0142ad: '+mt.spreadName],text:savedTarot});}
-    if(savedNumPerson){var mn=savedNpMeta;sections.push({title:'Numerologia Osoby',sub:'Cz\u0119\u015b\u0107 III',meta:['Imi\u0119: '+mn.fullname,'Data: '+mn.birthdate],text:savedNumPerson});}
-    if(savedNumRelation){var mr=savedNrMeta;sections.push({title:'Numerologia Relacji',sub:'Cz\u0119\u015b\u0107 IV',meta:['Osoba 1: '+mr.name1,'Osoba 2: '+mr.name2],text:savedNumRelation});}
-    if(savedNumBusiness){var mb=savedNbMeta;sections.push({title:'Numerologia Firmy',sub:'Cz\u0119\u015b\u0107 V',meta:['Firma: '+mb.name],text:savedNumBusiness});}
-    if(savedSynth)sections.push({title:'Synteza',sub:'Cz\u0119\u015b\u0107 ko\u0144cowa',meta:[],text:savedSynth});
+    var ma=savedAstroMeta;var sections=[];
+    if(savedAstro)sections.push({title:'Analiza Astrologiczna',sub:'Czesc I',meta:[ma.name?'Imie: '+ma.name:'','Data: '+ma.birthdate+(ma.birthtime?' / '+ma.birthtime:''),'Miejsce: '+ma.birthplace].filter(Boolean),text:savedAstro});
+    if(savedTarot){var mt=savedTarotMeta;sections.push({title:'Odczyt Tarota',sub:'Czesc II',meta:['Uklad: '+mt.spreadName],text:savedTarot});}
+    if(savedNumPerson){var mn=savedNpMeta;sections.push({title:'Numerologia Osoby',sub:'Czesc III',meta:['Imie: '+mn.fullname,'Data: '+mn.birthdate],text:savedNumPerson});}
+    if(savedNumRelation){var mr=savedNrMeta;sections.push({title:'Numerologia Relacji',sub:'Czesc IV',meta:['Osoba 1: '+mr.name1,'Osoba 2: '+mr.name2],text:savedNumRelation});}
+    if(savedNumBusiness){var mb=savedNbMeta;sections.push({title:'Numerologia Firmy',sub:'Czesc V',meta:['Firma: '+mb.name],text:savedNumBusiness});}
+    if(savedSynth)sections.push({title:'Synteza',sub:'Czesc koncowa',meta:[],text:savedSynth});
     var html='<!DOCTYPE html><html lang="pl"><head><meta charset="UTF-8"><link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;1,400&family=Cinzel:wght@400;500&display=swap" rel="stylesheet"><style>*{box-sizing:border-box;margin:0;padding:0}body{font-family:"EB Garamond",Georgia,serif;color:#2a2018;background:#fff;}.cover{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;text-align:center;padding:60px 40px;background:#faf6ef;page-break-after:always;}.section{max-width:720px;margin:0 auto;padding:40px 50px;page-break-after:always;}.sec-header{display:flex;justify-content:space-between;padding-bottom:10px;border-bottom:2px solid #b8902a;margin-bottom:24px;}.sec-brand{font-family:"Cinzel",serif;font-size:12px;color:#8a7a62;}h2{font-family:"Cinzel",serif;font-size:24px;font-weight:400;text-align:center;margin-bottom:5px;}.sec-sub{text-align:center;font-style:italic;color:#8a7a62;font-size:14px;margin-bottom:22px;}.meta-box{background:#fdf9f2;border:1px solid #e8d5a0;padding:12px 16px;margin-bottom:22px;}.meta-row{font-size:13px;color:#5a4a32;padding:2px 0;}.body-text{font-size:15px;line-height:1.9;white-space:pre-wrap;}.footer{margin-top:36px;padding-top:12px;border-top:1px solid #e8d5a0;text-align:center;font-size:10px;color:#8a7a62;font-family:"Cinzel",serif;}.no-print{position:fixed;bottom:20px;right:20px;display:flex;gap:8px;}@media print{.no-print{display:none!important;}@page{margin:15mm;}}</style></head><body>';
-    html+='<div class="cover"><div style="font-size:28px;color:#d4aa4a;letter-spacing:0.4em;margin-bottom:24px;">&#9789; &#10022; &#9791;</div><h1 style="font-family:\'Cinzel\',serif;font-size:36px;font-weight:400;letter-spacing:0.1em;margin-bottom:8px;">Astrum &amp; Arcana</h1><p style="font-style:italic;font-size:16px;color:#5a4a32;margin-bottom:28px;">Pe&#322;ny Raport Osobisty</p><div style="width:100px;height:1px;background:#b8902a;margin:0 auto 28px;"></div>'+(ma.name?'<p style="font-size:20px;margin-bottom:8px;">'+ma.name+'</p>':'')+(ma.birthdate?'<p style="font-size:14px;color:#8a7a62;">'+ma.birthdate+(ma.birthplace?' &middot; '+ma.birthplace:'')+'</p>':'')+'<p style="font-size:13px;color:#8a7a62;margin-top:20px;">'+parts.join(' &middot; ')+'</p><p style="font-size:12px;color:#8a7a62;margin-top:50px;">'+today+'</p></div>';
-    sections.forEach(function(s){
-      var metaRows=s.meta.filter(Boolean).map(function(l){return '<div class="meta-row">'+l+'</div>';}).join('');
-      var cleaned=s.text.replace(/\*\*/g,'').replace(/\*/g,'');
-      html+='<div class="section"><div class="sec-header"><span class="sec-brand">Astrum &amp; Arcana</span><span class="sec-brand">'+today+'</span></div><h2>'+s.title+'</h2><div class="sec-sub">'+s.sub+'</div>'+(metaRows?'<div class="meta-box">'+metaRows+'</div>':'')+'<div class="body-text">'+cleaned+'</div><div class="footer">Astrum &amp; Arcana &middot; '+today+'</div></div>';
-    });
-    html+='<div class="no-print"><button onclick="window.print()" style="font-family:\'Cinzel\',serif;font-size:13px;background:#b8902a;color:#fff;border:none;padding:10px 22px;border-radius:4px;cursor:pointer;">Drukuj / Zapisz PDF</button><button onclick="window.close()" style="font-family:\'Cinzel\',serif;font-size:13px;background:transparent;color:#8a7a62;border:1px solid #e8d5a0;padding:10px 16px;border-radius:4px;cursor:pointer;">Zamknij</button></div></body></html>';
+    html+='<div class="cover"><div style="font-size:28px;color:#d4aa4a;letter-spacing:0.4em;margin-bottom:24px;">&#9789; &#10022; &#9791;</div><h1 style="font-family:Cinzel,serif;font-size:36px;font-weight:400;letter-spacing:0.1em;margin-bottom:8px;">Astrum &amp; Arcana</h1><p style="font-style:italic;font-size:16px;color:#5a4a32;margin-bottom:28px;">Pelny Raport Osobisty</p><div style="width:100px;height:1px;background:#b8902a;margin:0 auto 28px;"></div>'+(ma.name?'<p style="font-size:20px;margin-bottom:8px;">'+ma.name+'</p>':'')+(ma.birthdate?'<p style="font-size:14px;color:#8a7a62;">'+ma.birthdate+(ma.birthplace?' / '+ma.birthplace:'')+'</p>':'')+'<p style="font-size:13px;color:#8a7a62;margin-top:20px;">'+parts.join(' / ')+'</p><p style="font-size:12px;color:#8a7a62;margin-top:50px;">'+today+'</p></div>';
+    sections.forEach(function(s){var metaRows=s.meta.filter(Boolean).map(function(l){return '<div class="meta-row">'+l+'</div>';}).join('');var cleaned=s.text.replace(/\*\*/g,'').replace(/\*/g,'');html+='<div class="section"><div class="sec-header"><span class="sec-brand">Astrum &amp; Arcana</span><span class="sec-brand">'+today+'</span></div><h2>'+s.title+'</h2><div class="sec-sub">'+s.sub+'</div>'+(metaRows?'<div class="meta-box">'+metaRows+'</div>':'')+'<div class="body-text">'+cleaned+'</div><div class="footer">Astrum &amp; Arcana / '+today+'</div></div>';});
+    html+='<div class="no-print"><button onclick="window.print()" style="font-family:Cinzel,serif;font-size:13px;background:#b8902a;color:#fff;border:none;padding:10px 22px;border-radius:4px;cursor:pointer;">Drukuj / Zapisz PDF</button><button onclick="window.close()" style="font-family:Cinzel,serif;font-size:13px;background:transparent;color:#8a7a62;border:1px solid #e8d5a0;padding:10px 16px;border-radius:4px;cursor:pointer;">Zamknij</button></div></body></html>';
     openPrintWindow(html);
   }
 }
-
 updateSynthStatus();
 </script>
 </body>
