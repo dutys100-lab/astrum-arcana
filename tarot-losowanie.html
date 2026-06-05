@@ -170,10 +170,7 @@ footer{text-align:center;padding:2rem 1rem;font-family:'Cinzel',serif;font-size:
   </div>
 </div>
 
-<div class="rev-row">
-  <input type="checkbox" id="rev-mode">
-  <label for="rev-mode" style="cursor:pointer;">Drugie klikni&#281;cie = karta <em>odwr&#243;cona</em></label>
-</div>
+
 
 <div class="deck-area">
   <div class="deck-title">&#9789; Talia kart &#9789;</div>
@@ -311,32 +308,27 @@ function renderDeck(){
 
 function onCardClick(card,i,name,front,s){
   var needed=s.count;
-  var revMode=document.getElementById('rev-mode').checked;
 
-  // Already selected this card
   var existing=flippedCards.find(function(c){return c.index===i;});
-  if(existing){
-    if(revMode&&!existing.reversed){
-      // Second click = reverse
-      existing.reversed=true;
-      front.className='card-front reversed';
-      front.innerHTML='<span class="card-num">&#8595;</span><span class="card-name">'+name+'</span><span class="rev-label">odwr\u00f3cona</span>';
-      updateSelectedDisplay();
-    }
-    return;
-  }
+  if(existing)return;
 
   if(flippedCards.length>=needed)return;
 
-  // Flip the card
+  // Automatyczne losowanie odwrocenia - 30% szans
+  var isReversed=Math.random()<0.30;
+
   var posIndex=flippedCards.length;
   var pos=s.positions[posIndex]||('Pozycja '+(posIndex+1));
 
-  flippedCards.push({index:i,name:name,reversed:false,position:pos});
+  flippedCards.push({index:i,name:name,reversed:isReversed,position:pos});
   card.classList.add('flipped');
-  front.className='card-front';
-  front.innerHTML='<span class="card-num">&#10022;</span><span class="card-name">'+name+'</span><span class="card-suit">'+pos+'</span>';
-
+  if(isReversed){
+    front.className='card-front reversed';
+    front.innerHTML='<span class="card-num">&#8595;</span><span class="card-name">'+name+'</span><span class="card-suit">'+pos+'</span><span class="rev-label">odwrócona</span>';
+  }else{
+    front.className='card-front';
+    front.innerHTML='<span class="card-num">&#10022;</span><span class="card-name">'+name+'</span><span class="card-suit">'+pos+'</span>';
+  }
   document.getElementById('flipped-count').textContent=flippedCards.length;
   updateSelectedDisplay();
 
